@@ -7,6 +7,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_jianxiong"],
 		keGroup: ["han", "qun"],
+		dieAudios: ["caocao"],
 	},
 	qj_simayi: {
 		sex: "male",
@@ -14,12 +15,14 @@ const character = {
 		hp: 3,
 		skills: ["qj_guicai", "qj_fankui"],
 		keGroup: ["jin"],
+		dieAudios: ["simayi"],
 	},
 	qj_xiahoudun: {
 		sex: "male",
 		group: "wei",
 		hp: 4,
 		skills: ["qj_ganglie", "qj_qingjian"],
+		dieAudios: ["xiahoudun"],
 	},
 	qj_zhangliao: {
 		sex: "male",
@@ -27,18 +30,21 @@ const character = {
 		hp: 4,
 		skills: ["qj_tuxi"],
 		keGroup: ["han", "qun"],
+		dieAudios: ["zhangliao"],
 	},
 	qj_xuchu: {
 		sex: "male",
 		group: "wei",
 		hp: 4,
 		skills: ["qj_luoyi"],
+		dieAudios: ["xuzhu"],
 	},
 	qj_guojia: {
 		sex: "male",
 		group: "wei",
 		hp: 3,
 		skills: ["qj_qingzi", "qj_yiji"],
+		dieAudios: ["guojia"],
 	},
 	qj_zhenji: {
 		sex: "female",
@@ -46,12 +52,14 @@ const character = {
 		hp: 3,
 		skills: ["qj_luoshen", "qj_qingguo"],
 		keGroup: ["qun"],
+		dieAudios: ["zhenji"],
 	},
 	qj_xiahouyuan: {
 		sex: "male",
 		group: "wei",
 		hp: 5,
 		skills: ["qj_shensu", "qj_shebian"],
+		dieAudios: ["xiahouyuan"],
 	},
 	qj_zhanghe: {
 		sex: "male",
@@ -59,6 +67,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_qiaobian"],
 		keGroup: ["qun"],
+		dieAudios: ["zhanghe"],
 	},
 	qj_xuhuang: {
 		sex: "male",
@@ -66,12 +75,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_duanliang", "qj_jiezi"],
 		keGroup: ["han"],
+		dieAudios: ["xuhuang"],
 	},
 	qj_caoren: {
 		sex: "male",
 		group: "wei",
 		hp: 4,
 		skills: ["qj_weikui", "qj_lizhan"],
+		dieAudios: ["caoren"],
 	},
 	qj_dianwei: {
 		sex: "male",
@@ -79,6 +90,7 @@ const character = {
 		hp: 5,
 		skills: ["qj_qiangxi"],
 		keGroup: ["qun"],
+		dieAudios: ["dianwei"],
 	},
 	qj_xunyu: {
 		sex: "male",
@@ -86,18 +98,21 @@ const character = {
 		hp: 3,
 		skills: ["qj_quhu", "qj_jieming"],
 		keGroup: ["han"],
+		dieAudios: ["xunyu"],
 	},
 	qj_caopi: {
 		sex: "male",
 		group: "wei",
 		hp: 3,
 		skills: ["qj_xingshang", "qj_fangzhu"],
+		dieAudios: ["caopi"],
 	},
 	qj_yuejin: {
 		sex: "male",
 		group: "wei",
 		hp: 4,
 		skills: ["qj_xiaoguo"],
+		dieAudios: ["yuejin"],
 	},
 	//蜀
 	qj_liubei: {
@@ -106,6 +121,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_rende"],
 		keGroup: ["han", "wei", "wu", "qun"],
+		dieAudios: ["liubei"],
 	},
 	qj_guanyu: {
 		sex: "male",
@@ -113,6 +129,7 @@ const character = {
 		hp: 5,
 		skills: ["qj_wusheng"],
 		keGroup: ["han", "wei"],
+		dieAudios: ["guanyu"],
 	},
 	qj_zhangfei: {
 		sex: "male",
@@ -120,12 +137,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_paoxiao"],
 		keGroup: ["han", "wu"],
+		dieAudios: ["zhangfei"],
 	},
 	qj_zhugeliang: {
 		sex: "male",
 		group: "shu",
 		hp: 3,
 		skills: ["qj_guanxing", "qj_kongcheng"],
+		dieAudios: ["zhugeliang"],
 	},
 	qj_zhaoyun: {
 		sex: "male",
@@ -133,6 +152,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_longdan"],
 		keGroup: ["han", "qun"],
+		dieAudios: ["zhaoyun"],
 	},
 	qj_machao: {
 		sex: "male",
@@ -140,12 +160,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_mashu", "qj_tieji"],
 		keGroup: ["qun"],
+		dieAudios: ["machao"],
 	},
 	qj_huangyueying: {
 		sex: "female",
 		group: "shu",
 		hp: 3,
 		skills: ["qj_jizhi", "qj_cangji"],
+		dieAudios: ["huangyueying"],
 	},
 	qj_huangzhong: {
 		sex: "male",
@@ -153,6 +175,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_liegong"],
 		keGroup: ["qun"],
+		dieAudios: ["huangzhong"],
 	},
 	qj_weiyan: {
 		sex: "male",
@@ -160,6 +183,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_kuanggu"],
 		keGroup: ["qun"],
+		dieAudios: ["weiyan"],
 	},
 	qj_pangtong: {
 		sex: "male",
@@ -167,13 +191,15 @@ const character = {
 		hp: 3,
 		skills: ["qj_lianhuan", "qj_niepan"],
 		keGroup: ["wu"],
+		dieAudios: ["pangtong"],
 	},
-	qj_wolong: {
+	qj_wolong_zhugeliang: {
 		sex: "male",
 		group: "shu",
 		hp: 3,
 		skills: ["qj_huoji", "qj_bazhen", "qj_kanpo"],
 		keGroup: ["wu"],
+		dieAudios: ["sp_zhugeliang"],
 	},
 	qj_liushan: {
 		sex: "male",
@@ -181,6 +207,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_xiangle", "qj_fangquan"],
 		keGroup: ["jin"],
+		dieAudios: ["liushan"],
 	},
 	qj_menghuo: {
 		sex: "male",
@@ -188,6 +215,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_huoshou", "qj_zaiqi"],
 		keGroup: ["qun"],
+		dieAudios: ["menghuo"],
 	},
 	qj_zhurongfuren: {
 		sex: "female",
@@ -195,12 +223,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_juxiang", "qj_lieren"],
 		keGroup: ["qun"],
+		dieAudios: ["zhurong"],
 	},
 	qj_ganfuren: {
 		sex: "female",
 		group: "shu",
 		hp: 3,
 		skills: ["qj_shushen", "qj_shenzhi"],
+		dieAudios: ["ganfuren"],
 	},
 	//吴
 	qj_sunquan: {
@@ -209,6 +239,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_zhiheng"],
 		keGroup: ["wei"],
+		dieAudios: ["sunquan"],
 	},
 	qj_ganning: {
 		sex: "male",
@@ -216,12 +247,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_qixi"],
 		keGroup: ["qun"],
+		dieAudios: ["ganning"],
 	},
 	qj_lvmeng: {
 		sex: "male",
 		group: "wu",
 		hp: 4,
 		skills: ["qj_keji", "qj_mouduan"],
+		dieAudios: ["lvmeng"],
 	},
 	qj_huanggai: {
 		sex: "male",
@@ -229,6 +262,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_kurou", "qj_zhaxiang"],
 		keGroup: ["han"],
+		dieAudios: ["huanggai"],
 	},
 	qj_zhouyu: {
 		sex: "male",
@@ -236,18 +270,21 @@ const character = {
 		hp: 4,
 		skills: ["qj_yingzi", "qj_fanjian"],
 		keGroup: ["qun"],
+		dieAudios: ["zhouyu"],
 	},
 	qj_daqiao: {
 		sex: "female",
 		group: "wu",
 		hp: 3,
 		skills: ["qj_guose", "qj_liuli"],
+		dieAudios: ["daqiao"],
 	},
 	qj_luxun: {
 		sex: "male",
 		group: "wu",
 		hp: 3,
 		skills: ["qj_qianxun", "qj_duoshi"],
+		dieAudios: ["luxun"],
 	},
 	qj_sunshangxiang: {
 		sex: "female",
@@ -255,6 +292,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_jieyin", "qj_xiaoji"],
 		keGroup: ["shu"],
+		dieAudios: ["sunshangxiang"],
 	},
 	qj_sunjian: {
 		sex: "male",
@@ -262,12 +300,14 @@ const character = {
 		hp: 5,
 		skills: ["qj_yinghun"],
 		keGroup: ["han", "qun"],
+		dieAudios: ["sunjian"],
 	},
 	qj_xiaoqiao: {
 		sex: "female",
 		group: "wu",
 		hp: 3,
 		skills: ["qj_tianxiang", "qj_hongyan"],
+		dieAudios: ["xiaoqiao"],
 	},
 	qj_taishici: {
 		sex: "male",
@@ -275,12 +315,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_tianyi", "qj_hanzhan"],
 		keGroup: ["han", "qun"],
+		dieAudios: ["taishici"],
 	},
 	qj_zhoutai: {
 		sex: "male",
 		group: "wu",
 		hp: 4,
 		skills: ["qj_buqu", "qj_fenji"],
+		dieAudios: ["zhoutai"],
 	},
 	qj_lusu: {
 		sex: "male",
@@ -288,6 +330,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_haoshi", "qj_dimeng"],
 		keGroup: ["shu", "qun"],
+		dieAudios: ["lusu"],
 	},
 	qj_zhangzhao: {
 		sex: "male",
@@ -295,12 +338,14 @@ const character = {
 		hp: 3,
 		skills: ["qj_zhijian", "qj_guzheng"],
 		keGroup: ["han"],
+		dieAudios: ["zhangzhao"],
 	},
 	qj_dingfeng: {
 		sex: "male",
 		group: "wu",
 		hp: 4,
 		skills: ["qj_duanbing", "qj_fenxun"],
+		dieAudios: ["dingfeng"],
 	},
 	//群
 	qj_huatuo: {
@@ -309,6 +354,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_jishi", "qj_chuli"],
 		keGroup: ["han", "wei", "shu", "wu"],
+		dieAudios: ["huatuo"],
 	},
 	qj_lvbu: {
 		sex: "male",
@@ -316,6 +362,7 @@ const character = {
 		hp: 5,
 		skills: ["qj_wushuang", "qj_xiaomeng"],
 		keGroup: ["han", "shu"],
+		dieAudios: ["lvbu"],
 	},
 	qj_diaochan: {
 		sex: "female",
@@ -323,6 +370,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_lijian", "qj_biyue"],
 		keGroup: ["han"],
+		dieAudios: ["diaochan"],
 	},
 	qj_yuanshao: {
 		sex: "male",
@@ -330,12 +378,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_luanji"],
 		keGroup: ["han"],
+		dieAudios: ["yuanshao"],
 	},
 	qj_yanliangwenchou: {
 		sex: "male",
 		group: "qun",
 		hp: 4,
 		skills: ["qj_shuangxiong"],
+		dieAudios: ["yanwen"],
 	},
 	qj_jiaxu: {
 		sex: "male",
@@ -343,6 +393,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_wansha", "qj_luanwu", "qj_weimu"],
 		keGroup: ["han", "wei"],
+		dieAudios: ["jiaxu"],
 	},
 	qj_pangde: {
 		sex: "male",
@@ -350,12 +401,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_mashu", "qj_menghan"],
 		keGroup: ["wei"],
+		dieAudios: ["pangde"],
 	},
 	qj_zhangjiao: {
 		sex: "male",
 		group: "qun",
 		hp: 3,
 		skills: ["qj_leiji", "qj_guidao"],
+		dieAudios: ["zhangjiao"],
 	},
 	qj_caiwenji: {
 		sex: "female",
@@ -363,6 +416,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_beige", "qj_duanchang"],
 		keGroup: ["han", "wei"],
+		dieAudios: ["caiwenji"],
 	},
 	qj_mateng: {
 		sex: "male",
@@ -370,18 +424,21 @@ const character = {
 		hp: 4,
 		skills: ["qj_mashu", "qj_xiongyi"],
 		keGroup: ["han"],
+		dieAudios: ["mateng"],
 	},
 	qj_jiling: {
 		sex: "male",
 		group: "qun",
 		hp: 4,
 		skills: ["qj_shuangren"],
+		dieAudios: ["jiling"],
 	},
 	qj_tianfeng: {
 		sex: "male",
 		group: "qun",
 		hp: 3,
 		skills: ["qj_sijian", "qj_suishi"],
+		dieAudios: ["tianfeng"],
 	},
 	qj_panfeng: {
 		sex: "male",
@@ -389,6 +446,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_kuangfu"],
 		keGroup: ["han"],
+		dieAudios: ["panfeng"],
 	},
 	qj_zoushi: {
 		sex: "female",
@@ -396,6 +454,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_huoshui", "qj_qingcheng"],
 		keGroup: ["wei"],
+		dieAudios: ["zoushi"],
 	},
 	qj_hansui: {
 		sex: "male",
@@ -403,6 +462,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_mashu", "qj_xiaoni"],
 		keGroup: ["han"],
+		dieAudios: ["hansui"],
 	},
 	//晋
 	qj_simayan: {
@@ -410,6 +470,7 @@ const character = {
 		group: "jin",
 		hp: 3,
 		skills: ["qj_chuitong", "qj_xingtu"],
+		// dieAudios: ["simayan"],
 	},
 	qj_simashi: {
 		sex: "male",
@@ -417,6 +478,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_tairan", "qj_yimie"],
 		keGroup: ["wei"],
+		dieAudios: ["simashi"],
 	},
 	qj_simazhao: {
 		sex: "male",
@@ -424,24 +486,28 @@ const character = {
 		hp: 3,
 		skills: ["qj_choufa", "qj_zhaoran"],
 		keGroup: ["wei"],
+		dieAudios: ["simazhao"],
 	},
 	qj_jiachong: {
 		sex: "male",
 		group: "jin",
 		hp: 3,
 		skills: ["qj_tongfa", "qj_beishi"],
+		dieAudios: ["jiachong"],
 	},
 	qj_yanghu: {
 		sex: "male",
 		group: "jin",
 		hp: 4,
 		skills: ["qj_rouke", "qj_shunliu"],
+		dieAudios: ["jin_yanghu"],
 	},
 	qj_wangyuanji: {
 		sex: "female",
 		group: "jin",
 		hp: 3,
 		skills: ["qj_shiren", "qj_jiexia"],
+		dieAudios: ["wangyuanji"],
 	},
 	qj_xiahouhui: {
 		sex: "female",
@@ -449,13 +515,15 @@ const character = {
 		hp: 3,
 		skills: ["qj_yishi", "qj_shidu"],
 		keGroup: ["wei"],
+		dieAudios: ["jin_xiahouhui"],
 	},
-	qj_jinsimayi: {
+	qj_jin_simayi: {
 		sex: "male",
 		group: "jin",
 		hp: 3,
 		skills: ["qj_quanbian", "qj_zhouting"],
 		keGroup: ["wei"],
+		dieAudios: ["jin_simayi"],
 	},
 	qj_zhangchunhua: {
 		sex: "female",
@@ -463,6 +531,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_shangshi", "qj_ejue"],
 		keGroup: ["wei"],
+		dieAudios: ["zhangchunhua"],
 	},
 	qj_zhanghuyuechen: {
 		sex: "male",
@@ -470,18 +539,21 @@ const character = {
 		hp: 4,
 		skills: ["qj_guoyi"],
 		keGroup: ["wei"],
+		dieAudios: ["zhanghuyuechen"],
 	},
 	qj_yanghuiyu: {
 		sex: "female",
 		group: "jin",
 		hp: 3,
 		skills: ["qj_ciwei", "qj_caiyuan"],
+		dieAudios: ["yanghuiyu"],
 	},
 	qj_wangjun: {
 		sex: "male",
 		group: "jin",
 		hp: 4,
 		skills: ["qj_keqing"],
+		dieAudios: ["wangjun"],
 	},
 	qj_wenyang: {
 		sex: "male",
@@ -489,18 +561,21 @@ const character = {
 		hp: 5,
 		skills: ["qj_lvli", "qj_duoqi"],
 		keGroup: ["wei", "wu"],
+		dieAudios: ["wenyang"],
 	},
 	qj_shibao: {
 		sex: "male",
 		group: "jin",
 		hp: 4,
 		skills: ["qj_qianqu"],
+		dieAudios: ["shibao"],
 	},
 	qj_zhanghua: {
 		sex: "male",
 		group: "jin",
 		hp: 3,
 		skills: ["qj_fuli", "qj_fengwu"],
+		dieAudios: ["zhanghua"],
 	},
 	//汉
 	qj_liuxie: {
@@ -509,6 +584,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_tianming", "qj_mizhao"],
 		keGroup: ["wei", "qun"],
+		dieAudios: ["liuxie"],
 	},
 	qj_liubian: {
 		sex: "male",
@@ -516,42 +592,49 @@ const character = {
 		hp: 3,
 		skills: ["qj_shiyuan", "qj_dushi"],
 		keGroup: ["qun"],
+		dieAudios: ["liubian"],
 	},
 	qj_zhangrang: {
 		sex: "male",
 		group: "han",
 		hp: 3,
 		skills: ["qj_taoluan"],
+		dieAudios: ["zhangrang"],
 	},
 	qj_hejin: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_mouzhu", "qj_yanhuo"],
+		dieAudios: ["hejin"],
 	},
 	qj_wangyun: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_lianji", "qj_dingzhu"],
+		dieAudios: ["wangyun"],
 	},
 	qj_wangrong: {
 		sex: "female",
 		group: "han",
 		hp: 3,
 		skills: ["qj_minsi", "qj_fusong"],
+		dieAudios: ["wangrong"],
 	},
 	qj_fuhuanghou: {
 		sex: "female",
 		group: "han",
 		hp: 3,
 		skills: ["qj_zhuikong", "qj_qiuyuan"],
+		dieAudios: ["fuhuanghou"],
 	},
 	qj_fuwan: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_moukui"],
+		dieAudios: ["fuwan"],
 	},
 	qj_dongcheng: {
 		sex: "male",
@@ -559,12 +642,14 @@ const character = {
 		hp: 4,
 		skills: ["qj_chengzhao"],
 		keGroup: ["qun"],
+		dieAudios: ["dongcheng"],
 	},
 	qj_tangji: {
 		sex: "female",
 		group: "han",
 		hp: 3,
 		skills: ["qj_aiwu", "qj_juebie"],
+		dieAudios: ["tangji"],
 	},
 	qj_caiyong: {
 		sex: "male",
@@ -572,30 +657,35 @@ const character = {
 		hp: 3,
 		skills: ["qj_zhudian", "qj_botong"],
 		keGroup: ["qun"],
+		dieAudios: ["caiyong"],
 	},
 	qj_huangfusong: {
 		sex: "male",
 		group: "han",
 		hp: 5,
 		skills: ["qj_fenyue"],
+		dieAudios: ["huangfusong"],
 	},
 	qj_liuchongluojun: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_jingnu", "qj_weitun"],
+		dieAudios: ["liuchongluojun"],
 	},
 	qj_liuyao: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_kannan", "qj_niju"],
+		dieAudios: ["liuyao"],
 	},
 	qj_jianshuo: {
 		sex: "male",
 		group: "han",
 		hp: 4,
 		skills: ["qj_jibing"],
+		dieAudios: ["tw_jianshuo"],
 	},
 	//士兵
 	yc_niujin: {
@@ -604,6 +694,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_niujin"],
 		isUnseen: true,
+		dieAudios: ["niujin"],
 	},
 	yc_zhoucang: {
 		sex: "male",
@@ -611,6 +702,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_zhoucang"],
 		isUnseen: true,
+		dieAudios: ["zhoucang"],
 	},
 	yc_quexiaojiang: {
 		sex: "male",
@@ -618,6 +710,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_quexiaojiang"],
 		isUnseen: true,
+		// dieAudios: ["quexiaojiang"],
 	},
 	yc_wenhu: {
 		sex: "male",
@@ -625,6 +718,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_wenhu"],
 		isUnseen: true,
+		// dieAudios: ["wenhu"],
 	},
 	yc_mushun: {
 		sex: "male",
@@ -632,6 +726,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_mushun"],
 		isUnseen: true,
+		dieAudios: ["mushun"],
 	},
 	yc_huweijun: {
 		sex: "male",
@@ -639,6 +734,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_huweijun"],
 		isUnseen: true,
+		// dieAudios: ["huweijun"],
 	},
 	yc_baimayicong: {
 		sex: "male",
@@ -646,6 +742,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_baimayicong"],
 		isUnseen: true,
+		// dieAudios: ["baimayicong"],
 	},
 	yc_xiangbing: {
 		sex: "male",
@@ -653,6 +750,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_xiangbing"],
 		isUnseen: true,
+		// dieAudios: ["xiangbing"],
 	},
 	yc_jinfanjun: {
 		sex: "male",
@@ -660,6 +758,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_jinfanjun"],
 		isUnseen: true,
+		// dieAudios: ["jinfanjun"],
 	},
 	yc_bingzhoulangqi: {
 		sex: "male",
@@ -667,6 +766,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_bingzhoulangqi"],
 		isUnseen: true,
+		// dieAudios: ["bingzhoulangqi"],
 	},
 	yc_huangjinleishi: {
 		sex: "female",
@@ -674,6 +774,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_huangjinleishi"],
 		isUnseen: true,
+		// dieAudios: ["huangjinleishi"],
 	},
 	yc_fuxinsishi: {
 		sex: "male",
@@ -681,6 +782,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_fuxinsishi"],
 		isUnseen: true,
+		// dieAudios: ["fuxinsishi"],
 	},
 	yc_xiyuanjun: {
 		sex: "male",
@@ -688,6 +790,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_xiyuanjun"],
 		isUnseen: true,
+		// dieAudios: ["xiyuanjun"],
 	},
 };
 

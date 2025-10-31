@@ -31,7 +31,7 @@ export async function content(extension, pack, config) {
 		"qj_huangzhong",
 		"qj_weiyan",
 		"qj_pangtong",
-		"qj_wolong",
+		"qj_wolong_zhugeliang",
 		"qj_liushan",
 		"qj_menghuo",
 		"qj_zhurongfuren",
@@ -73,7 +73,7 @@ export async function content(extension, pack, config) {
 		"qj_yanghu",
 		"qj_wangyuanji",
 		"qj_xiahouhui",
-		"qj_jinsimayi",
+		"qj_jin_simayi",
 		"qj_zhangchunhua",
 		"qj_zhanghuyuechen",
 		"qj_yanghuiyu",
@@ -119,7 +119,7 @@ export async function content(extension, pack, config) {
 	lib.perfectPair.guojia = ["caocao"];
 	lib.perfectPair.zhanghe = ["gaolan"];
 	lib.perfectPair.caopi = ["zhenji"];
-	lib.perfectPair.liubei = ["guanyu", "zhangfei", "zhugeliang", "wolong"];
+	lib.perfectPair.liubei = ["guanyu", "zhangfei", "zhugeliang"];
 	lib.perfectPair.guanyu = ["zhangliao", "xuhuang"];
 	lib.perfectPair.zhangfei = ["guanyu", "zhaoyun"];
 	lib.perfectPair.zhugeliang = [
@@ -132,7 +132,7 @@ export async function content(extension, pack, config) {
 	lib.perfectPair.machao = ["pangde"];
 	lib.perfectPair.huangzhong = ["weiyan"];
 	lib.perfectPair.pangtong = ["zhouyu", "lusu"];
-	lib.perfectPair.wolong = ["pangtong", "huangyueying"];
+	lib.perfectPair.wolong_zhugeliang = ["pangtong", "huangyueying"];
 	lib.perfectPair.menghuo = ["zhurongfuren", "muludawang"];
 	lib.perfectPair.ganfuren = ["liubei"];
 	lib.perfectPair.sunquan = ["zhoutai"];

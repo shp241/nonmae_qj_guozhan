@@ -69,11 +69,10 @@ const skill = {
 		},
 	},
 	qj_guicai: {
-		audio: 2,
+		audio: "guicai",
 		audioname: ["new_simayi"],
 		trigger: { global: "judge" },
 		preHidden: true,
-		direct: true,
 		filter(event, player) {
 			return player.countCards("hes") > 0;
 		},
@@ -171,7 +170,7 @@ const skill = {
 		},
 	},
 	qj_fankui: {
-		audio: 2,
+		audio: "fankui",
 		trigger: { player: "damageEnd" },
 		logTarget: "source",
 		preHidden: true,
@@ -266,7 +265,7 @@ const skill = {
 		},
 	},
 	qj_qingjian: {
-		audio: 2,
+		audio: "qingjian",
 		trigger: {
 			player: "gainAfter",
 			global: "loseAsyncAfter",
@@ -347,12 +346,11 @@ const skill = {
 		},
 	},
 	qj_tuxi: {
-		audio: "retuxi",
+		audio: "tuxi",
 		audioname2: { gz_jun_caocao: "jianan_tuxi" },
 		trigger: {
 			player: "phaseDrawBegin2",
 		},
-		direct: true,
 		preHidden: true,
 		filter(event, player) {
 			return (
@@ -496,6 +494,7 @@ const skill = {
 		},
 	},
 	qj_qingzi: {
+		audio: "qingzi",
 		trigger: { player: "phaseZhunbeiBegin" },
 		filter(event, player) {
 			return game.hasPlayer((current) => {
@@ -508,7 +507,6 @@ const skill = {
 			});
 		},
 		derivation: "qj_shensu",
-		direct: true,
 		preHidden: true,
 		async cost(event, trigger, player) {
 			player
@@ -541,21 +539,15 @@ const skill = {
 				});
 		},
 		async content(event, trigger, player) {
-			var target = event.targets[0];
-			if (
-				target.hasCard((card) => {
-					return lib.filter.canBeDiscarded(card, player, target);
-				}, "e")
-			) {
-				player.discardPlayerCard(target, "e", true);
-				const skill = event.name + "_effect";
-				target.addAdditionalSkills(skill, "qj_shensu");
-				target.addTempSkill(skill, { player: "phaseAfter" });
-			}
+			var target = event.target;
+			player.discardPlayerCard(target, "e", true);
+			const skill = event.name + "_effect";
+			target.addAdditionalSkills(skill, "qj_shensu");
+			target.addTempSkill(skill, { player: "phaseAfter" });
 		},
 	},
 	qj_yiji: {
-		audio: 2,
+		audio: "yiji",
 		trigger: { player: "damageEnd" },
 		frequent: true,
 		preHidden: true,
@@ -688,7 +680,7 @@ const skill = {
 		},
 	},
 	qj_luoshen: {
-		audio: 2,
+		audio: "luoshen",
 		trigger: { player: "phaseZhunbeiBegin" },
 		frequent: true,
 		preHidden: true,
@@ -761,11 +753,7 @@ const skill = {
 		},
 		locked: false,
 		preHidden: true,
-		audio: 2,
-		audioname: ["sb_zhenji"],
-		audioname2: {
-			re_zhenji: "reqingguo",
-		},
+		audio: "qingguo",
 		enable: ["chooseToRespond", "chooseToUse"],
 		filterCard(card) {
 			return get.color(card) == "black";
@@ -800,13 +788,11 @@ const skill = {
 	},
 	qj_shensu: {
 		audio: "shensu1", // TODO: 独立素材，留给后来人
-		audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
 		group: ["qj_shensu_1", "qj_shensu_2", "qj_shensu_3"],
 		preHidden: ["qj_hensu_1", "qj_shensu_2", "qj_shensu_3"],
 	},
 	qj_shensu_1: {
-		audio: 2,
-		audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
+		audio: "shensu1",
 		trigger: { player: "phaseJudgeBefore" },
 		sourceSkill: "qj_shensu",
 		async cost(event, trigger, player) {
@@ -847,7 +833,6 @@ const skill = {
 	},
 	qj_shensu_2: {
 		audio: "shensu1",
-		audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
 		trigger: { player: "phaseUseBefore" },
 		sourceSkill: "qj_shensu",
 		filter(event, player) {
@@ -916,7 +901,6 @@ const skill = {
 	},
 	qj_shensu_3: {
 		audio: "shensu1", // TODO: 独立素材，留给后来人
-		audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
 		trigger: {
 			player: "phaseDiscardBegin",
 		},
@@ -975,7 +959,7 @@ const skill = {
 		},
 	},
 	qj_shebian: {
-		audio: 2,
+		audio: "shebian",
 		trigger: {
 			player: "loseHpAfter",
 		},
@@ -990,7 +974,7 @@ const skill = {
 		},
 	},
 	qj_qiaobian: {
-		audio: 2,
+		audio: "qiaobian",
 		audioname2: { gz_jun_caocao: "jianan_qiaobian" },
 		trigger: {
 			player: [
@@ -1126,7 +1110,7 @@ const skill = {
 		ai: { threaten: 3 },
 	},
 	qj_duanliang: {
-		audio: 2,
+		audio: "duanliang",
 		locked: false,
 		enable: "chooseToUse",
 		filterCard(card) {
@@ -1192,7 +1176,7 @@ const skill = {
 		trigger: {
 			global: ["phaseDrawSkipped", "phaseDrawCancelled"],
 		},
-		audio: 2,
+		audio: "jiezi",
 		preHidden: true,
 		frequent:true,
 		filter(event, player) {
@@ -1203,17 +1187,16 @@ const skill = {
 		},
 	},
 	qj_weikui: {
-		audio: 2,
+		audio: "weikui",
 		enable: "phaseUse",
 		usable: 1,
 		preHidden: true,
 		filterTarget(card, player, target) {
 			return target != player && target.countCards("h");
 		},
-		async cost(event, trigger, player) {
-			await player.loseHp();
-		},
 		async content(event, trigger, player) {
+			await player.loseHp();
+			let target = event.target;
 			if (target.countCards("h", "shan")) {
 				player.viewHandcards(target);
 				if (
@@ -1267,11 +1250,10 @@ const skill = {
 		},
 	},
 	qj_lizhan: {
-		audio: 2,
+		audio: "lizhan",
 		trigger: {
 			player: "phaseJieshuBegin",
 		},
-		direct: true,
 		preHidden: true,
 		filter(event, player) {
 			for (var i = 0; i < game.players.length; i++) {
@@ -1345,7 +1327,7 @@ const skill = {
 				return false;
 			}
 			var stat = player.getStat()._qiangxix;
-			return !stat || !stat.includes(target);
+			return player.inRange(target) && (!stat || !stat.includes(target));
 		},
 		selectCard() {
 			if (_status.event.player.hp < 1) {
@@ -1353,18 +1335,16 @@ const skill = {
 			}
 			return [0, 1];
 		},
-		async cost(event, trigger, player) {
+		async content(event, trigger, player) {
 			var stat = player.getStat();
 			if (!stat._qiangxix) {
 				stat._qiangxix = [];
 			}
-			stat._qiangxix.push(target);
-			if (!cards.length) {
-				player.loseHp();
+			stat._qiangxix.push(event.target);
+			if (!event.cards.length) {
+				await player.loseHp();
 			}
-		},
-		async content(event, trigger, player) {
-			event.targets[0].damage("nocard");
+			event.target.damage("nocard");
 		},
 		ai: {
 			damage: true,
@@ -1406,7 +1386,7 @@ const skill = {
 		},
 	},
 	qj_quhu: {
-		audio: 2,
+		audio: "quhu",
 		audioname: ["re_xunyu", "ol_xunyu"],
 		enable: "phaseUse",
 		usable: 1,
@@ -1519,7 +1499,7 @@ const skill = {
 		},
 	},
 	qj_jieming: {
-		audio: 2,
+		audio: "jieming",
 		trigger: {
 			player: "damageEnd",
 		},
@@ -1598,7 +1578,7 @@ const skill = {
 		},
 	},
 	qj_xingshang: {
-		audio: 2,
+		audio: "xingshang",
 		audioname2: {
 			caoying: "lingren_xingshang",
 		},
@@ -1651,7 +1631,7 @@ const skill = {
 		},
 	},
 	qj_fangzhu: {
-		audio: 2,
+		audio: "fangzhu",
 		trigger: {
 			player: "damageEnd",
 		},
