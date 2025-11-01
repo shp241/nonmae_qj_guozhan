@@ -3306,7 +3306,6 @@ const skill = {
 			player.addTempSkill("keji_add", "phaseAfter");
 		},
 	},
-	// TODO: 获得“涉猎”技能
 	qj_mouduan: {
 		trigger: {
 			player: "phaseJieshuBegin",
@@ -3332,6 +3331,7 @@ const skill = {
 		async content(event, trigger, player) {
 			await player.moveCard();
 		},
+		// TODO: 满足两个条件获得“涉猎”技能；补充 ai
 	},
 	qj_shelie: {
 		audio: 2,
@@ -3339,7 +3339,6 @@ const skill = {
 		filter(event, player) {
 			return !event.numFixed;
 		},
-		// TODO: 重构为异步函数
 		content() {
 			"step 0";
 			trigger.changeToZero();
@@ -3544,7 +3543,6 @@ const skill = {
 		discard: false,
 		lose: false,
 		delay: false,
-		// TODO: 重构为异步函数
 		content() {
 			"step 0";
 			target.storage.refanjian = cards[0];
@@ -4087,7 +4085,100 @@ const skill = {
 		},
 	},
 	qj_hanzhan: {
-		// TODO: 你拼点后，你可以获得拼点牌之中点数最大的【杀】。
+		trigger: {
+			global: "chooseToCompareAfter",
+		},
+		audio: "hanzhan",
+		filter(event, player) {
+			if (event.preserve) {
+				return false;
+			}
+			if (player != event.player && player != event.target && (!event.targets || !event.targets.includes(player))) {
+				return false;
+			}
+			for (var i of event.lose_list) {
+				if (Array.isArray(i[1])) {
+					for (var j of i[1]) {
+						if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+							return true;
+						}
+					}
+				} else {
+					var j = i[1];
+					if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		frequent: true,
+		prompt2(event, player) {
+			var cards = [],
+				max = 0;
+			for (var i of event.lose_list) {
+				if (Array.isArray(i[1])) {
+					for (var j of i[1]) {
+						if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+							var num = get.number(j, i[0]);
+							if (num > max) {
+								cards = [];
+								max = num;
+							}
+							if (num == max) {
+								cards.push(j);
+							}
+						}
+					}
+				} else {
+					var j = i[1];
+					if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+						var num = get.number(j, i[0]);
+						if (num > max) {
+							cards = [];
+							max = num;
+						}
+						if (num == max) {
+							cards.push(j);
+						}
+					}
+				}
+			}
+			return "获得" + get.translation(cards);
+		},
+		content() {
+			var cards = [],
+				max = 0;
+			for (var i of trigger.lose_list) {
+				if (Array.isArray(i[1])) {
+					for (var j of i[1]) {
+						if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+							var num = get.number(j, i[0]);
+							if (num > max) {
+								cards = [];
+								max = num;
+							}
+							if (num == max) {
+								cards.push(j);
+							}
+						}
+					}
+				} else {
+					var j = i[1];
+					if (get.name(j, i[0]) == "sha" && get.position(j, true) == "o") {
+						var num = get.number(j, i[0]);
+						if (num > max) {
+							cards = [];
+							max = num;
+						}
+						if (num == max) {
+							cards.push(j);
+						}
+					}
+				}
+			}
+			player.gain(cards, "gain2");
+		},
 	},
 	qj_buqu: {
 		// TODO: 锁定技，当你进入濒死状态时，你摸一张牌，然后选择一项：1.将一张牌置于武将牌上（称为“创”，每花色限一张）并回复体力至1点；2.弃置一张牌。
@@ -4268,10 +4359,172 @@ const skill = {
 		},
 	},
 	qj_zhijian: {
-		// TODO: 缝合ol版和re版（可以用自己的装备区牌发动，但是不可替换原装备）
+		audio: 2,
+		enable: "phaseUse",
+		filter(event, player) {
+			return player.countCards("he", { type: "equip" }) > 0;
+		},
+		filterCard(card) {
+			return get.type(card) == "equip";
+		},
+		position: "he",
+		check(card) {
+			var player = _status.currentPhase;
+			if (player.countCards("he", { subtype: get.subtype(card) }) > 1) {
+				return 11 - get.equipValue(card);
+			}
+			return 6 - get.value(card);
+		},
+		filterTarget(card, player, target) {
+			if (target.isMin()) {
+				return false;
+			}
+			return player != target && target.canEquip(card);
+		},
+		async content(event, trigger, player) {
+			await event.target.equip(event.cards[0]);
+			await player.draw();
+		},
+		discard: false,
+		lose: false,
+		prepare(cards, player, targets) {
+			player.$give(cards, targets[0], false);
+		},
+		ai: {
+			basic: {
+				order: 10,
+			},
+			result: {
+				target(player, target) {
+					var card = ui.selected.cards[0];
+					if (card) {
+						return get.effect(target, card, target, target);
+					}
+					return 0;
+				},
+			},
+			threaten: 1.35,
+		},
 	},
 	qj_guzheng: {
-		// TODO: 用ol版，但每阶段限一次改成每回合限一次
+		audio: 2,
+		trigger: {
+			global: ["loseAfter", "loseAsyncAfter"],
+		},
+		filter(event, player) {
+			if (event.type != "discard") {
+				return false;
+			}
+			if (player.hasSkill("olguzheng_used")) {
+				return false;
+			}
+			var phaseName;
+			for (var name of lib.phaseName) {
+				var evt = event.getParent(name);
+				if (!evt || evt.name != name) {
+					continue;
+				}
+				phaseName = name;
+				break;
+			}
+			if (!phaseName) {
+				return false;
+			}
+			return game.hasPlayer(current => {
+				if (current == player) {
+					return false;
+				}
+				var evt = event.getl(current);
+				if (!evt || !evt.cards2 || evt.cards2.filterInD("d").length < 2) {
+					return false;
+				}
+				return true;
+			});
+		},
+		checkx(event, player, cards) {
+			if (cards.length > 2 || get.attitude(player, event.player) > 0) {
+				return true;
+			}
+			for (var i = 0; i < cards.length; i++) {
+				if (get.value(cards[i], event.player, "raw") < 0) {
+					return true;
+				}
+			}
+			return false;
+		},
+		direct: true,
+		preHidden: true,
+		async content(event, trigger, player) {
+			const targets = [],
+				cardsList = [],
+				players = game.filterPlayer().sortBySeat(_status.currentPhase);
+			for (const current of players) {
+				if (current == player) {
+					continue;
+				}
+				const cards = [];
+				const evt = trigger.getl(current);
+				if (!evt || !evt.cards2) {
+					continue;
+				}
+				const cardsx = evt.cards2.filterInD("d");
+				cards.addArray(cardsx);
+				if (cards.length) {
+					targets.push(current);
+					cardsList.push(cards);
+				}
+			}
+			while (targets.length) {
+				const target = targets.shift();
+				let cards = cardsList.shift();
+				const result = await player
+					.chooseButton(2, [get.prompt("olguzheng", target), '<span class="text center">被选择的牌将成为对方收回的牌</span>', cards, [["获得剩余的牌", "放弃剩余的牌"], "tdnodes"]])
+					.set("filterButton", function (button) {
+						const type = typeof button.link;
+						if (ui.selected.buttons.length && type == typeof ui.selected.buttons[0].link) {
+							return false;
+						}
+						return true;
+					})
+					.set("check", lib.skill.olguzheng.checkx(trigger, player, cards))
+					.set("ai", function (button) {
+						if (typeof button.link == "string") {
+							return button.link == "获得剩余的牌" ? 1 : 0;
+						}
+						if (_status.event.check) {
+							return 20 - get.value(button.link, _status.event.getTrigger().player);
+						}
+						return 0;
+					})
+					.setHiddenSkill("olguzheng")
+					.forResult();
+				if (result?.links) {
+					player.logSkill("olguzheng", target);
+					const links = result.links;
+					player.addTempSkill("olguzheng_used", "phaseJieshuAfter");
+					if (typeof links[0] != "string") {
+						links.reverse();
+					}
+					const card = links[1];
+					await target.gain(card, "gain2");
+					cards.remove(card);
+					cards = cards.filterInD("d");
+					if (cards.length > 0 && links[0] == "获得剩余的牌") {
+						await player.gain(cards, "gain2");
+					}
+					break;
+				}
+			}
+		},
+		ai: {
+			threaten: 1.3,
+			expose: 0.2,
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+			},
+		},
 	},
 	qj_duanbing: {
 		audio: "duanbing",
