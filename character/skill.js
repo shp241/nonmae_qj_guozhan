@@ -3425,21 +3425,17 @@ const skill = {
 			neg: true,
 		},
 	},
-	// TODO: 修改为乔剪版
 	qj_zhaxiang: {
 		audio: 2,
 		trigger: { player: "loseHpEnd" },
 		filter(event, player) {
 			return player.isIn() && event.num > 0;
 		},
-		getIndex: event => event.num,
 		forced: true,
 		async content(event, trigger, player) {
 			await player.draw(3);
-			if (player.isPhaseUsing()) {
-				player.addTempSkill(event.name + "_effect");
-				player.addMark(event.name + "_effect", 1, false);
-			}
+			player.addTempSkill(event.name + "_effect", { global: "phaseJieshuAfter" });
+			player.addMark(event.name + "_effect", 1, false);
 		},
 		subSkill: {
 			effect: {
@@ -3451,7 +3447,7 @@ const skill = {
 					},
 					cardUsable(card, player, num) {
 						if (card.name == "sha") {
-							return num + player.countMark("zhaxiang_effect");
+							return num + player.countMark("qj_zhaxiang_effect");
 						}
 					},
 				},
@@ -3459,22 +3455,7 @@ const skill = {
 				onremove: true,
 				audio: "zhaxiang",
 				audioname2: { ol_sb_jiangwei: "zhaxiang_ol_sb_jiangwei" },
-				trigger: { player: "useCard" },
-				sourceSkill: "zhaxiang",
-				filter(event, player) {
-					return event.card?.name == "sha" && get.color(event.card) == "red";
-				},
-				forced: true,
-				async content(event, trigger, player) {
-					trigger.directHit.addArray(game.players);
-				},
-				intro: { content: "<li>使用【杀】的次数上限+#<br><li>使用红色【杀】无距离限制且不能被【闪】响应" },
-				ai: {
-					directHit_ai: true,
-					skillTagFilter(player, tag, arg) {
-						return arg?.card?.name == "sha" && get.color(arg.card) == "red";
-					},
-				},
+				intro: { content: "<li>使用红色【杀】无距离限制<br><li>使用【杀】的次数+#" },
 			},
 		},
 		ai: {
@@ -4009,7 +3990,163 @@ const skill = {
 		},
 	},
 	qj_tianxiang: {
-		// TODO: "当你受到伤害时，你可以弃置一张红桃牌并防止此伤害，然后选择一名其他角色和本回合未选择过的一项：1.来源对其造成1点伤害，然后其摸等同其已损失体力值的牌（至多摸五张）；2.其失去1点体力，然后获得你弃置的牌。"
+		audio: "tianxiang",
+		audioname: ["daxiaoqiao", "re_xiaoqiao", "ol_xiaoqiao"],
+		trigger: { player: "damageBegin4" },
+		preHidden: true,
+		init(player, skill) {
+			if (!player.storage[skill + "_used"]) {
+				player.storage[skill + "_used"] = [false, false];
+			}
+		},
+		filter(event, player) {
+			return (
+				player.countCards("he", function (card) {
+					return _status.connectMode || get.suit(card, player) == "heart";
+				}) > 0 && event.num > 0
+			);
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseCardTarget({
+					filterCard(card, player) {
+						return get.suit(card) == "heart" && lib.filter.cardDiscardable(card, player);
+					},
+					filterTarget(card, player, target) {
+						return player != target;
+					},
+					position: "he",
+					ai1(card) {
+						return 10 - get.value(card);
+					},
+					ai2(target) {
+						const att = get.attitude(_status.event.player, target);
+						const trigger = _status.event.getTrigger();
+						let da = 0;
+						if (_status.event.player.hp == 1) {
+							da = 10;
+						}
+						const eff = get.damageEffect(target, trigger.source, target);
+						if (att == 0) {
+							return 0.1 + da;
+						}
+						if (eff >= 0 && att > 0) {
+							return att + da;
+						}
+						if (att > 0 && target.hp > 1) {
+							if (target.maxHp - target.hp >= 3) {
+								return att * 1.1 + da;
+							}
+							if (target.maxHp - target.hp >= 2) {
+								return att * 0.9 + da;
+							}
+						}
+						return -att + da;
+					},
+					prompt: get.prompt(event.skill),
+					prompt2: lib.translate[`${event.skill}_info`],
+				})
+				.setHiddenSkill(event.name.slice(0, -5))
+				.forResult();
+		},
+		// TODO: 待测试
+		async content(event, trigger, player) {
+			const [target] = event.targets;
+			const [card] = event.cards;
+			trigger.cancel();
+			await player.discard(event.cards);
+
+			// 获取可用的选项（过滤掉已使用的选项）
+			const used = player.storage[event.name + "_used"] || [false, false];
+			const choices = []; // 存储原始选项编号（0或1）
+			const choiceList = [];
+			const aiValues = [];
+
+			if (!used[0]) {
+				choices.push(0);
+				choiceList.push("来源对其造成1点伤害，然后其摸等同其已损失体力值的牌（至多摸五张）");
+				let att = get.attitude(player, target);
+				if (target.hasSkillTag("maihp")) {
+					att = -att;
+				}
+				aiValues.push(att > 0 ? 0 : 1);
+			}
+
+			if (!used[1]) {
+				choices.push(1);
+				choiceList.push("其失去1点体力，然后获得你弃置的牌");
+				let att = get.attitude(player, target);
+				if (target.hasSkillTag("maihp")) {
+					att = -att;
+				}
+				aiValues.push(att > 0 ? 1 : 0);
+			}
+
+			if (choices.length === 0) {
+				return;
+			}
+
+			const { result } = await player
+				.chooseControlList(
+					true,
+					function (event, player, index) {
+						// index 是 choiceList 中的索引，需要转换为原始选项编号
+						const originalIndex = choices[index];
+						const aiIndex = choices.indexOf(originalIndex);
+						return aiValues[aiIndex];
+					},
+					choiceList
+				)
+				.set("target", target);
+
+			if (typeof result.index != "number") {
+				return;
+			}
+
+			// 获取原始选项编号（0或1）
+			const originalChoice = choices[result.index];
+
+			// 标记选中的选项为已使用
+			player.storage[event.name + "_used"][originalChoice] = true;
+
+			if (originalChoice) {
+				// 选项2：失去体力并获得牌
+				event.related = target.loseHp();
+			} else {
+				// 选项1：受到伤害并摸牌
+				event.related = target.damage(trigger.source || "nosource", "nocard");
+			}
+			await event.related;
+			//if(event.related.cancelled||target.isDead()) return;
+			if (originalChoice && card.isInPile()) {
+				await target.gain(card, "gain2");
+			} else if (!originalChoice && target.getDamagedHp()) {
+				await target.draw(Math.min(5, target.getDamagedHp()));
+			}
+		},
+		subSkill: {
+			clear: {
+				trigger: { player: "phaseZhunbeiBegin" },
+				forced: true,
+				popup: false,
+				content() {
+					player.storage["qj_tianxiang_used"] = [false, false];
+				},
+			},
+		},
+		ai: {
+			maixie_defend: true,
+			effect: {
+				target(card, player, target) {
+					if (player.hasSkillTag("jueqing", false, target)) {
+						return;
+					}
+					if (get.tag(card, "damage") && target.countCards("he") > 1) {
+						return 0.7;
+					}
+				},
+			},
+		},
 	},
 	qj_hongyan: {
 		audio: true,
