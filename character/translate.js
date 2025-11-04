@@ -122,6 +122,9 @@ const translate = {
 	qj_luoyi: "裸衣",
 	qj_luoyi_info:
 		"摸牌阶段结束时，你可以弃置一张牌，然后本回合你使用【杀】或【决斗】造成的伤害+1。",
+	tl_xuchu: "统领【决斗】",
+	tl_xuchu_info:
+		"【决斗】|虎卫军：每回合结束时，若你本回合共计造成和受到过的伤害数大于1，你可以移动场上一张牌。",
 	qj_qingzi: "轻辎",
 	qj_qingzi_info:
 		"准备阶段，你可以弃置一名与你势力相同的其他角色装备区的一张牌，令其获得“神速”直到其回合结束。",
@@ -154,6 +157,9 @@ const translate = {
 	qj_qiangxi: "强袭",
 	qj_qiangxi_info:
 		"出牌阶段每名角色限一次，你可以失去1点体力或弃置一张武器牌，对你攻击范围内的一名其他角色造成1点伤害。",
+	tl_dianwei: "统领【决斗】",
+	tl_dianwei_info:
+		"【决斗】|虎卫军：每回合结束时，若你本回合共计造成和受到过的伤害数大于1，你可以移动场上一张牌。",
 	qj_quhu: "驱虎",
 	qj_quhu_info:
 		"出牌阶段限一次，你可以与一名体力值大于你的角色拼点，若你赢，其对其攻击范围内由你选择的另一名角色造成1点伤害；若你没赢，其对你造成1点伤害。",
@@ -544,42 +550,42 @@ const translate = {
 	qj_jibing: "集兵",
 	qj_jibing_info:
 		"摸牌阶段，你可以多摸X张牌（X为与你势力相同的角色数）。若如此做，回合结束时，若你本回合造成伤害值小于X，你失去1点体力。",
-	qj_niujin: "牛金",
+	qj_niujin: "翼从",
 	qj_niujin_info:
 		"与你势力相同的角色回合结束时，你可以使用每种类别至多各一张牌，你以此法杀死角色后摸三张牌。",
-	qj_zhoucang: "周仓",
+	qj_zhoucang: "翼从",
 	qj_zhoucang_info:
 		"当你使用【杀】后，你可以将此【杀】或目标角色使用的【闪】交给另一名其他角色，若其以此法获得红色牌，其可以对你攻击范围内的一名角色使用一张【杀】。",
-	qj_quexiaojiang: "曲阿小将",
+	qj_quexiaojiang: "翼从",
 	qj_quexiaojiang_info:
 		"锁定技，当你使用【杀】指定目标后，你视为装备着所有目标的武器且无视其防具，直到此【杀】结算结束。",
-	qj_wenhu: "文虎",
+	qj_wenhu: "翼从",
 	qj_wenhu_info:
 		"出牌阶段限一次，你可以弃置任意个区域的所有牌，然后视为使用目标上限为X的【决斗】（X为你以此法弃置牌的区域数）。",
-	qj_mushun: "穆顺",
+	qj_mushun: "翼从",
 	qj_mushun_info:
 		"每回合限一次，当你弃置任意角色的牌或被其他角色弃置牌后，你可以获得其中一张。若如此做，本回合你下次弃置任意角色的牌或被其他角色弃置牌后，你失去1点体力。",
-	qj_huweijun: "虎卫军",
+	qj_huweijun: "翼从",
 	qj_huweijun_info:
 		"每回合结束时，若你本回合共计造成和受到过的伤害数大于1，你可以移动场上一张牌。",
-	qj_baimayicong: "白马义从",
+	qj_baimayicong: "翼从",
 	qj_baimayicong_info: "当你使用或打出【闪】时，你可以获得对方的一张牌。",
-	qj_xiangbing: "象兵",
+	qj_xiangbing: "翼从",
 	qj_xiangbing_info:
 		"锁定技，当你使用【杀】后，你视为对受到此【杀】伤害的目标角色使用一张【南蛮入侵】；当你受到火焰伤害后，你视为对所有相邻角色使用一张【杀】。",
-	qj_jinfanjun: "锦帆军",
+	qj_jinfanjun: "翼从",
 	qj_jinfanjun_info:
 		"每回合每颜色限一次，当你弃置牌后，你可以弃置一张同颜色的牌并摸两张牌。",
-	qj_bingzhoulangqi: "并州狼骑",
+	qj_bingzhoulangqi: "翼从",
 	qj_bingzhoulangqi_info:
 		"出牌阶段限一次，你可以令一名其他角色视为对你使用一张【决斗】，本回合你与其距离视为1。",
-	qj_huangjinleishi: "黄巾雷使",
+	qj_huangjinleishi: "翼从",
 	qj_huangjinleishi_info:
 		"每回合首次有角色不因使用手牌而造成伤害时，你可以弃置一张手牌并判定，若为：黑色，此伤害+1；红色，其获得此判定牌。",
-	qj_fuxinsishi: "腹心死士",
+	qj_fuxinsishi: "翼从",
 	qj_fuxinsishi_info:
 		"与你势力相同的角色回合结束时，若其有未发动的限定技，你可以摸一张牌，交给其一张牌；若其本回合发动过限定技，你可以视为对其攻击范围内的一名角色使用【杀】。",
-	qj_xiyuanjun: "西园军",
+	qj_xiyuanjun: "翼从",
 	qj_xiyuanjun_info:
 		"与你势力相同的角色出牌阶段开始时，你可以选择一名角色的一张手牌，本回合此牌对所有角色可见且其不能使用或打出之，其受到伤害后来源获得之。",
 };

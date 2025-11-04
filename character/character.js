@@ -36,7 +36,7 @@ const character = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["qj_luoyi"],
+		skills: ["qj_luoyi","tl_xuchu"],
 		dieAudios: ["xuzhu"],
 	},
 	qj_guojia: {
@@ -88,7 +88,7 @@ const character = {
 		sex: "male",
 		group: "wei",
 		hp: 5,
-		skills: ["qj_qiangxi"],
+		skills: ["qj_qiangxi","tl_dianwei"],
 		keGroup: ["qun"],
 		dieAudios: ["dianwei"],
 	},
@@ -694,6 +694,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_niujin"],
 		isUnseen: true,
+		isShibing: true,
 		dieAudios: ["niujin"],
 	},
 	yc_zhoucang: {
@@ -702,6 +703,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_zhoucang"],
 		isUnseen: true,
+		isShibing: true,
 		dieAudios: ["zhoucang"],
 	},
 	yc_quexiaojiang: {
@@ -710,6 +712,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_quexiaojiang"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["quexiaojiang"],
 	},
 	yc_wenhu: {
@@ -718,6 +721,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_wenhu"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["wenhu"],
 	},
 	yc_mushun: {
@@ -726,6 +730,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_mushun"],
 		isUnseen: true,
+		isShibing: true,
 		dieAudios: ["mushun"],
 	},
 	yc_huweijun: {
@@ -734,6 +739,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_huweijun"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["huweijun"],
 	},
 	yc_baimayicong: {
@@ -742,6 +748,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_baimayicong"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["baimayicong"],
 	},
 	yc_xiangbing: {
@@ -750,6 +757,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_xiangbing"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["xiangbing"],
 	},
 	yc_jinfanjun: {
@@ -758,6 +766,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_jinfanjun"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["jinfanjun"],
 	},
 	yc_bingzhoulangqi: {
@@ -766,6 +775,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_bingzhoulangqi"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["bingzhoulangqi"],
 	},
 	yc_huangjinleishi: {
@@ -774,6 +784,7 @@ const character = {
 		hp: 3,
 		skills: ["qj_huangjinleishi"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["huangjinleishi"],
 	},
 	yc_fuxinsishi: {
@@ -782,6 +793,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_fuxinsishi"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["fuxinsishi"],
 	},
 	yc_xiyuanjun: {
@@ -790,6 +802,7 @@ const character = {
 		hp: 4,
 		skills: ["qj_xiyuanjun"],
 		isUnseen: true,
+		isShibing: true,
 		// dieAudios: ["xiyuanjun"],
 	},
 };
