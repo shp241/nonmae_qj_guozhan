@@ -163,4 +163,28 @@ export async function content(extension, pack, config) {
 	lib.perfectPair.fuhuanghou = ["liuxie"];
 	lib.perfectPair.dongcheng = ["liuxie"];
 	lib.perfectPair.caiyong = ["dongzhuo"];
+
+	if (lib.rank) {
+		const rank = {
+			a: [],
+			am: [],
+			bp: [],
+			b: [],
+			bm: [],
+		};
+		for (let i in rank) {
+			lib.rank[i].addArray(rank[i]);
+		}
+		if (lib.rank.rarity) {
+			const rarity = {
+				legend: [],
+				epic: [],
+				rare: [],
+				junk: [],
+			};
+			for (let i in rarity) {
+				lib.rank.rarity[i].addArray(rarity[i]);
+			}
+		}
+	}
 }
