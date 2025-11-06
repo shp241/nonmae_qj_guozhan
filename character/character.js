@@ -1,3 +1,5 @@
+import { get, game } from "../../../noname.js";
+
 /** @type { importCharacterConfig['character'] } */
 const character = {
 	//魏
@@ -36,7 +38,7 @@ const character = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["qj_luoyi","tl_xuchu"],
+		skills: ["qj_luoyi", "tl_xuchu"],
 		dieAudios: ["xuzhu"],
 	},
 	qj_guojia: {
@@ -81,14 +83,14 @@ const character = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["qj_weikui", "qj_lizhan","tl_caoren"],
+		skills: ["qj_weikui", "qj_lizhan", "tl_caoren"],
 		dieAudios: ["caoren"],
 	},
 	qj_dianwei: {
 		sex: "male",
 		group: "wei",
 		hp: 5,
-		skills: ["qj_qiangxi","tl_dianwei"],
+		skills: ["qj_qiangxi", "tl_dianwei"],
 		keGroup: ["qun"],
 		dieAudios: ["dianwei"],
 	},
@@ -127,7 +129,7 @@ const character = {
 		sex: "male",
 		group: "shu",
 		hp: 5,
-		skills: ["qj_wusheng","tl_guanyu"],
+		skills: ["qj_wusheng", "tl_guanyu"],
 		keGroup: ["han", "wei"],
 		dieAudios: ["guanyu"],
 	},
@@ -150,7 +152,7 @@ const character = {
 		sex: "male",
 		group: "shu",
 		hp: 4,
-		skills: ["qj_longdan","tl_zhaoyun"],
+		skills: ["qj_longdan", "tl_zhaoyun"],
 		keGroup: ["han", "qun"],
 		dieAudios: ["zhaoyun"],
 	},
@@ -221,7 +223,7 @@ const character = {
 		sex: "female",
 		group: "shu",
 		hp: 4,
-		skills: ["qj_juxiang", "qj_lieren","tl_zhurongfuren"],
+		skills: ["qj_juxiang", "qj_lieren", "tl_zhurongfuren"],
 		keGroup: ["qun"],
 		dieAudios: ["zhurong"],
 	},
@@ -245,7 +247,7 @@ const character = {
 		sex: "male",
 		group: "wu",
 		hp: 4,
-		skills: ["qj_qixi","tl_ganning"],
+		skills: ["qj_qixi", "tl_ganning"],
 		keGroup: ["qun"],
 		dieAudios: ["ganning"],
 	},
@@ -313,7 +315,7 @@ const character = {
 		sex: "male",
 		group: "wu",
 		hp: 4,
-		skills: ["qj_tianyi", "qj_hanzhan","tl_taishici"],
+		skills: ["qj_tianyi", "qj_hanzhan", "tl_taishici"],
 		keGroup: ["han", "qun"],
 		dieAudios: ["taishici"],
 	},
@@ -360,7 +362,7 @@ const character = {
 		sex: "male",
 		group: "qun",
 		hp: 5,
-		skills: ["qj_wushuang", "qj_xiaomeng","tl_lvbu"],
+		skills: ["qj_wushuang", "qj_xiaomeng", "tl_lvbu"],
 		keGroup: ["han", "shu"],
 		dieAudios: ["lvbu"],
 	},
@@ -407,7 +409,7 @@ const character = {
 		sex: "male",
 		group: "qun",
 		hp: 3,
-		skills: ["qj_leiji", "qj_guidao","tl_zhangjiao"],
+		skills: ["qj_leiji", "qj_guidao", "tl_zhangjiao"],
 		dieAudios: ["zhangjiao"],
 	},
 	qj_caiwenji: {
@@ -476,7 +478,7 @@ const character = {
 		sex: "male",
 		group: "jin",
 		hp: 4,
-		skills: ["qj_tairan", "qj_yimie","tl_simashi"],
+		skills: ["qj_tairan", "qj_yimie", "tl_simashi"],
 		keGroup: ["wei"],
 		dieAudios: ["simashi"],
 	},
@@ -521,7 +523,7 @@ const character = {
 		sex: "male",
 		group: "jin",
 		hp: 3,
-		skills: ["qj_quanbian", "qj_zhouting","tl_jin_simayi"],
+		skills: ["qj_quanbian", "qj_zhouting", "tl_jin_simayi"],
 		keGroup: ["wei"],
 		dieAudios: ["jin_simayi"],
 	},
@@ -559,7 +561,7 @@ const character = {
 		sex: "male",
 		group: "jin",
 		hp: 5,
-		skills: ["qj_lvli", "qj_duoqi","tl_wenyang"],
+		skills: ["qj_lvli", "qj_duoqi", "tl_wenyang"],
 		keGroup: ["wei", "wu"],
 		dieAudios: ["wenyang"],
 	},
@@ -633,7 +635,7 @@ const character = {
 		sex: "male",
 		group: "han",
 		hp: 4,
-		skills: ["qj_moukui","tl_fuwan"],
+		skills: ["qj_moukui", "tl_fuwan"],
 		dieAudios: ["fuwan"],
 	},
 	qj_dongcheng: {
@@ -685,7 +687,7 @@ const character = {
 		group: "han",
 		hp: 4,
 		skills: ["qj_jibing"],
-		dieAudios: ["tw_jianshuo","tl_jianshuo"],
+		dieAudios: ["tw_jianshuo", "tl_jianshuo"],
 	},
 	//士兵
 	yc_niujin: {
@@ -808,8 +810,28 @@ const character = {
 };
 
 for (let i in character) {
-	character[i].img =
-		"extension/乔剪国战/image/character/" + i.substring(3) + ".jpg";
+	character[i].img = "extension/乔剪国战/image/character/" + i.substring(3) + ".jpg";
 }
+
+// 异步检查并设置客将皮肤
+(function initKeSkin() {
+	try {
+		if (get && get.config && get.config("kejiang")) {
+			for (let i in character) {
+				const charName = i.substring(3);
+				const keSkinPath = "extension/乔剪国战/image/ke_skin/" + charName + ".jpg";
+				if (game && game.checkFile) {
+					game.checkFile(keSkinPath, result => {
+						if (result === 1) {
+							character[i].img = keSkinPath;
+						}
+					});
+				}
+			}
+		}
+	} catch (e) {
+		// 如果 get 或 game 还未初始化，忽略错误
+	}
+})();
 
 export default character;
