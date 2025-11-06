@@ -6362,7 +6362,7 @@ const skill = {
 		...createTonglingSkill("tl_ganning", "yc_jinfanjun", "wuxie", "【无懈可击】"),
 	},
 	tl_taishici: {
-		...createTonglingSkill("tl_taishici", "yc_quexiaojiang", "sha", "【杀】"),
+		...createTonglingSkill("tl_taishici", "yc_quexiaojiang", "sha", "【杀】", true),
 	},
 	tl_lvbu: {
 		...createTonglingSkill("tl_lvbu", "yc_bingzhoulangqi", "sha", "【杀】"),
