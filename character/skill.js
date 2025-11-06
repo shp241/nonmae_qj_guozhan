@@ -5092,14 +5092,448 @@ const skill = {
 			},
 		},
 	},
-	qj_jishi: {},
-	qj_chuli: {},
-	qj_wushuang: {},
-	qj_xiaomeng: {},
-	qj_lijian: {},
-	qj_biyue: {},
-	qj_luanji: {},
-	qj_shuangxiong: {},
+	qj_jishi: {
+		// 你可以将红色牌当【桃】对濒死角色使用，此濒死结算后，若此武将为客将，与你势力不同的角色依次选择是否用一个武将交换此武将。
+	},
+	qj_chuli: {
+		audio: "chulao",
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget(card, player, target) {
+			if (player == target) {
+				return false;
+			}
+			for (var i = 0; i < ui.selected.targets.length; i++) {
+				if (ui.selected.targets[i].isFriendOf(target)) {
+					return false;
+				}
+			}
+			return target.countCards("he") > 0;
+		},
+		filter(event, player) {
+			return player.countCards("he") > 0;
+		},
+		filterCard: true,
+		position: "he",
+		selectTarget: [1, 3],
+		check(card) {
+			if (get.suit(card) == "spade") {
+				return 8 - get.value(card);
+			}
+			return 5 - get.value(card);
+		},
+		contentBefore() {
+			var evt = event.getParent();
+			evt.draw = [];
+			if (get.suit(cards[0]) == "spade") {
+				evt.draw.push(player);
+			}
+		},
+		content() {
+			"step 0";
+			player.discardPlayerCard(target, "he", true);
+			"step 1";
+			if (result.bool) {
+				if (get.suit(result.cards[0]) == "spade") {
+					event.getParent().draw.push(target);
+				}
+			}
+		},
+		contentAfter() {
+			"step 0";
+			var list = event.getParent().draw;
+			if (!list.length) {
+				event.finish();
+			} else {
+				game.asyncDraw(list);
+			}
+			"step 1";
+			game.delay();
+		},
+		ai: {
+			result: {
+				target: -1,
+			},
+			tag: {
+				discard: 1,
+				lose: 1,
+				loseCard: 1,
+			},
+			threaten: 1.2,
+			order: 3,
+		},
+	},
+	qj_wushuang: {
+		audio: 2,
+		audioname: ["re_lvbu", "shen_lvbu", "lvlingqi"],
+		audioname2: { sb_lvbu: "sbliyu_effect" },
+		forced: true,
+		locked: true,
+		group: ["qj_wushuang_sha", "qj_wushuang_juedou"],
+		preHidden: ["qj_wushuang_sha", "qj_wushuang_juedou"],
+		subSkill: {
+			sha: {
+				audio: "qj_wushuang",
+				trigger: { player: "useCardToPlayered" },
+				forced: true,
+				sourceSkill: "qj_wushuang",
+				filter(event, player) {
+					return event.card.name == "sha" && !event.getParent().directHit.includes(event.target);
+				},
+				//priority:-1,
+				logTarget: "target",
+				async content(event, trigger, player) {
+					const id = trigger.target.playerid;
+					const map = trigger.getParent().customArgs;
+					if (!map[id]) {
+						map[id] = {};
+					}
+					if (typeof map[id].shanRequired == "number") {
+						map[id].shanRequired++;
+					} else {
+						map[id].shanRequired = 2;
+					}
+				},
+				ai: {
+					directHit_ai: true,
+					skillTagFilter(player, tag, arg) {
+						if (arg.card.name != "sha" || arg.target.countCards("h", "shan") > 1) {
+							return false;
+						}
+					},
+				},
+			},
+			juedou: {
+				audio: "qj_wushuang",
+				audioname: ["re_lvbu", "shen_lvbu", "lvlingqi"],
+				audioname2: {
+					sb_lvbu: "sbliyu_effect",
+					gz_lvlingqi: "qj_wushuang_lvlingqi",
+				},
+				trigger: { player: "useCardToPlayered", target: "useCardToTargeted" },
+				forced: true,
+				sourceSkill: "qj_wushuang",
+				logTarget(trigger, player) {
+					return player == trigger.player ? trigger.target : trigger.player;
+				},
+				filter(event, player) {
+					return event.card.name == "juedou";
+				},
+				//priority:-1,
+				async content(event, trigger, player) {
+					const id = (player == trigger.player ? trigger.target : trigger.player)["playerid"];
+					const idt = trigger.target.playerid;
+					const map = trigger.getParent().customArgs;
+					if (!map[idt]) {
+						map[idt] = {};
+					}
+					if (!map[idt].shaReq) {
+						map[idt].shaReq = {};
+					}
+					if (!map[idt].shaReq[id]) {
+						map[idt].shaReq[id] = 1;
+					}
+					map[idt].shaReq[id]++;
+				},
+				ai: {
+					directHit_ai: true,
+					skillTagFilter(player, tag, arg) {
+						if (arg.card.name != "juedou" || Math.floor(arg.target.countCards("h", "sha") / 2) > player.countCards("h", "sha")) {
+							return false;
+						}
+					},
+				},
+			},
+		}
+	},
+	qj_xiaomeng: {
+		// TODO: 每回合限一次，当你使用【决斗】时，当前回合角色可以为此牌多指定至多两个目标。
+	},
+	qj_lijian: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			return game.countPlayer(current => current != player && current.hasSex("male")) > 1;
+		},
+		check(card) {
+			return 10 - get.value(card);
+		},
+		filterCard: true,
+		position: "he",
+		filterTarget(card, player, target) {
+			if (player == target) {
+				return false;
+			}
+			if (!target.hasSex("male")) {
+				return false;
+			}
+			if (ui.selected.targets.length == 1) {
+				return target.canUse({ name: "juedou" }, ui.selected.targets[0]);
+			}
+			return true;
+		},
+		targetprompt: ["先出杀", "后出杀"],
+		selectTarget: 2,
+		multitarget: true,
+		async content(event, trigger, player) {
+			const useCardEvent = event.targets[1].useCard({ name: "juedou", isCard: true }, "nowuxie", event.targets[0], "noai");
+			useCardEvent.animate = false;
+			await game.delay(0.5);
+		},
+		ai: {
+			order: 8,
+			result: {
+				target(player, target) {
+					if (ui.selected.targets.length == 0) {
+						return -3;
+					} else {
+						return get.effect(target, { name: "juedou" }, ui.selected.targets[0], target);
+					}
+				},
+			},
+			expose: 0.4,
+			threaten: 3,
+		},
+	},
+	qj_biyue: {
+		audio: 2,
+		audioname2: { sp_diaochan: "biyue" },
+		trigger: { player: "phaseJieshuBegin" },
+		frequent: true,
+		content() {
+			player.draw(player.countCards("h") ? 1 : 2);
+		},
+	},
+	qj_luanji: {
+		audio: "luanji",
+		enable: "phaseUse",
+		viewAs: {
+			name: "wanjian",
+		},
+		filterCard(card, player) {
+			if (!player.storage.qj_luanji) {
+				return true;
+			}
+			return !player.storage.qj_luanji.includes(get.suit(card));
+		},
+		selectCard: 2,
+		position: "hs",
+		filter(event, player) {
+			return (
+				player.countCards("hs", function (card) {
+					return !player.storage.qj_luanji || !player.storage.qj_luanji.includes(get.suit(card));
+				}) > 1
+			);
+		},
+		check(card) {
+			const player = get.player();
+			const targets = game.filterPlayer(current => player.canUse("wanjian", cast(current)) ?? false);
+			let num = 0;
+			for (let i = 0; i < targets.length; i++) {
+				let eff = get.sgn(get.effect(targets[i], { name: "wanjian" }, player, player));
+				if (targets[i].hp == 1) {
+					eff *= 1.5;
+				}
+				num += eff;
+			}
+			if (!player.needsToDiscard(-1)) {
+				if (targets.length >= 7) {
+					if (num < 2) {
+						return 0;
+					}
+				} else if (targets.length >= 5) {
+					if (num < 1.5) {
+						return 0;
+					}
+				}
+			}
+			return 6 - get.value(card);
+		},
+		group: ["qj_luanji_count", "qj_luanji_reset", "qj_luanji_respond"],
+		subSkill: {
+			reset: {
+				trigger: {
+					player: "phaseAfter",
+				},
+				silent: true,
+				filter(event, player) {
+					return player.storage.qj_luanji ? true : false;
+				},
+				async content(event, trigger, player) {
+					delete player.storage.qj_luanji;
+				},
+				sub: true,
+				forced: true,
+				popup: false,
+			},
+			count: {
+				trigger: {
+					player: "useCard",
+				},
+				silent: true,
+				filter(event) {
+					return event.skill == "qj_luanji";
+				},
+				async content(event, trigger, player) {
+					if (!player.storage.qj_luanji) {
+						player.storage.qj_luanji = [];
+					}
+					for (let i = 0; i < trigger.cards.length; i++) {
+						player.storage.qj_luanji.add(get.suit(trigger.cards[i]));
+					}
+				},
+				sub: true,
+				forced: true,
+				popup: false,
+			},
+			respond: {
+				trigger: {
+					global: "respond",
+				},
+				silent: true,
+				filter(event) {
+					if (event.player.isUnseen()) {
+						return false;
+					}
+					// @ts-expect-error 类型系统未来可期
+					return event.getParent(2).skill == "qj_luanji" && event.player.isFriendOf(_status.currentPhase);
+				},
+				async content(event, trigger, player) {
+					await trigger.player.draw();
+				},
+				sub: true,
+				forced: true,
+				popup: false,
+			},
+		},
+	},
+	qj_shuangxiong: {
+		audio: 2,
+		trigger: { player: "phaseDrawEnd" },
+		filter: (event, player) => player.countCards("he") > 0,
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseToDiscard("he", get.prompt("qj_shuangxiong"), "弃置一张牌，然后你本回合内可以将一张与此牌颜色不同的牌当做【决斗】使用", "chooseonly")
+				.set("ai", function (card) {
+					let player = _status.event.player;
+					if (!_status.event.goon || player.skipList.includes("phaseUse")) {
+						return -get.value(card);
+					}
+					let color = get.color(card),
+						effect = 0,
+						cards = player.getCards("hes"),
+						sha = false;
+					for (const cardx of cards) {
+						if (cardx == card || get.color(cardx) == color) {
+							continue;
+						}
+						const cardy = get.autoViewAs({ name: "juedou" }, [cardx]),
+							eff1 = player.getUseValue(cardy);
+						if (get.position(cardx) == "e") {
+							let eff2 = get.value(cardx);
+							if (eff1 > eff2) {
+								effect += eff1 - eff2;
+							}
+							continue;
+						} else if (get.name(cardx) == "sha") {
+							if (sha) {
+								effect += eff1;
+								continue;
+							} else {
+								sha = true;
+							}
+						}
+						let eff2 = player.getUseValue(cardx, null, true);
+						if (eff1 > eff2) {
+							effect += eff1 - eff2;
+						}
+					}
+					return effect - get.value(card);
+				})
+				.set("goon", player.hasValueTarget({ name: "juedou" }) && !player.hasSkill("qj_shuangxiong_effect"))
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const { cards } = event,
+				color = get.color(cards[0], player);
+			await player.modedDiscard(cards);
+			player.markAuto("qj_shuangxiong_effect", [color]);
+			player.addTempSkill("qj_shuangxiong_effect");
+		},
+		group: "qj_shuangxiong_jianxiong",
+		subSkill: {
+			effect: {
+				audio: "qj_shuangxiong",
+				enable: "chooseToUse",
+				viewAs: { name: "juedou" },
+				position: "hes",
+				viewAsFilter(player) {
+					return player.hasCard(card => lib.skill.qj_shuangxiong_effect.filterCard(card, player), "hes");
+				},
+				filterCard(card, player) {
+					const color = get.color(card),
+						colors = player.getStorage("qj_shuangxiong_effect");
+					for (const i of colors) {
+						if (color != i) {
+							return true;
+						}
+					}
+					return false;
+				},
+				prompt() {
+					const colors = _status.event.player.getStorage("qj_shuangxiong_effect");
+					let str = "将一张颜色";
+					for (let i = 0; i < colors.length; i++) {
+						if (i > 0) {
+							str += "或";
+						}
+						str += "不为";
+						str += get.translation(colors[i]);
+					}
+					str += "的牌当做【决斗】使用";
+					return str;
+				},
+				check(card) {
+					const player = _status.event.player;
+					if (get.position(card) == "e") {
+						const raw = get.value(card);
+						const eff = player.getUseValue(get.autoViewAs({ name: "juedou" }, [card]));
+						return eff - raw;
+					}
+					const raw = player.getUseValue(card, null, true);
+					const eff = player.getUseValue(get.autoViewAs({ name: "juedou" }, [card]));
+					return eff - raw;
+				},
+				onremove: true,
+				charlotte: true,
+				ai: { order: 7 },
+			},
+			jianxiong: {
+				audio: "qj_shuangxiong",
+				trigger: { player: "phaseJieshuBegin" },
+				forced: true,
+				locked: false,
+				filter(event, player) {
+					return player.hasHistory("damage", function (evt) {
+						//Disable Umi Kato's chaofan
+						return evt.card && evt.cards && evt.cards.some(card => get.position(card, true));
+					});
+				},
+				content() {
+					const cards = [];
+					player.getHistory("damage", function (evt) {
+						if (evt.card && evt.cards) {
+							cards.addArray(evt.cards.filterInD("d"));
+						}
+					});
+					if (cards.length) {
+						player.gain(cards, "gain2");
+					}
+				},
+			},
+		},
+	},
 	qj_wansha: {},
 	qj_luanwu: {},
 	qj_weimu: {},
