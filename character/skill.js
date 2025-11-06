@@ -607,11 +607,11 @@ const skill = {
 					cards.length == 1
 						? { result: { links: cards.slice(0), bool: true } }
 						: await player.chooseCardButton("遗计：请选择要分配的牌", true, cards, [1, cards.length]).set("ai", () => {
-								if (ui.selected.buttons.length == 0) {
-									return 1;
-								}
-								return 0;
-						  });
+							if (ui.selected.buttons.length == 0) {
+								return 1;
+							}
+							return 0;
+						});
 				if (!bool) {
 					return;
 				}
@@ -2762,7 +2762,7 @@ const skill = {
 			}
 			event.result = { bool: true, skill_popup: false };
 		},
-		async content(_event, _trigger, _player) {},
+		async content(_event, _trigger, _player) { },
 	},
 	qj_lianhuan: {
 		audio: "lianhuan",
@@ -3054,7 +3054,7 @@ const skill = {
 						.set("prompt", false)
 						.forResult();
 					card = result.card[0];
-					await player.showCards(cards).setContent(function () {});
+					await player.showCards(cards).setContent(function () { });
 					event.dialog = ui.create.dialog(get.translation(player) + "展示的手牌", cards);
 					event.videoId = lib.status.videoId++;
 
@@ -4310,12 +4310,12 @@ const skill = {
 						get.tag(card, "damage") &&
 						get.itemtype(player) === "player" &&
 						target.hp >
-							(player.hasSkillTag("damageBonus", true, {
-								target: target,
-								card: card,
-							})
-								? 2
-								: 1)
+						(player.hasSkillTag("damageBonus", true, {
+							target: target,
+							card: card,
+						})
+							? 2
+							: 1)
 					) {
 						return [1, 0.5];
 					}
