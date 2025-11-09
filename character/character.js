@@ -23,7 +23,7 @@ const character = {
 		sex: "male",
 		group: "wei",
 		hp: 4,
-		skills: ["qj_ganglie", "qj_qingjian"],
+		skills: ["qj_ganglie", "qj_chizhong"],
 		dieAudios: ["xiahoudun"],
 	},
 	qj_zhangliao: {
@@ -554,7 +554,7 @@ const character = {
 		sex: "male",
 		group: "jin",
 		hp: 4,
-		skills: ["qj_keqing"],
+		skills: ["qj_chengliu", "qj_keqing"],
 		dieAudios: ["wangjun"],
 	},
 	qj_wenyang: {
@@ -607,7 +607,7 @@ const character = {
 		sex: "male",
 		group: "han",
 		hp: 4,
-		skills: ["qj_mouzhu", "qj_yanhuo"],
+		skills: ["qj_mouzhu", "qj_gounan"],
 		dieAudios: ["hejin"],
 	},
 	qj_wangyun: {

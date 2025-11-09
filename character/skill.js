@@ -406,7 +406,7 @@ const skill = {
 			expose: 0.4,
 		},
 	},
-	qj_qingjian: {
+	qj_chizhong: {
 		audio: "qingjian",
 		trigger: {
 			player: "gainAfter",
@@ -414,7 +414,7 @@ const skill = {
 		},
 		preHidden: true,
 		filter(event, player) {
-			if (player.hasSkill("qj_qingjian_used")) {
+			if (player.hasSkill("qj_chizhong_used")) {
 				return false;
 			}
 			var evt = event.getParent("phaseDraw");
@@ -472,7 +472,7 @@ const skill = {
 				cards,
 			} = event;
 			await player.give(cards, target);
-			player.addTempSkill("qj_qingjian_used", "phaseJieshuAfter");
+			player.addTempSkill("qj_chizhong_used", "phaseJieshuAfter");
 		},
 		ai: {
 			expose: 0.3,
@@ -7098,7 +7098,7 @@ const skill = {
 			},
 		},
 	},
-	qj_yanhuo: {
+	qj_gounan: {
 		//TODO
 	},
 	qj_lianji: {
