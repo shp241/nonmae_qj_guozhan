@@ -1,5 +1,199 @@
 import { lib, game, ui, get, ai, _status } from "../../../noname.js";
 
+/**
+ * 创建统令类型技能模板
+ * @param {string} skillName - 技能名称（如 "tl_xuchu"）
+ * @param {string} ycName - 武将名（如 "yc_huweijun"）
+ * @param {string} cardName - 卡牌名（如 "juedou"）
+ * @param {string} cardTranslation - 卡牌翻译（如 "【决斗】"）
+ * @param {boolean} [limitOne=false] - 是否限一（默认 false）
+ * @returns {object} 支持链式调用的技能对象构建器
+ */
+function createTonglingSkill(skillName, ycName, cardName, cardTranslation, limitOne = false) {
+	const globalSkillName = skillName + "_use";
+
+	// 用于存储 viewAs 和 mod 的额外内容
+	const viewAsExtras = {};
+	const modExtras = {};
+
+	// 创建技能对象
+	const skillObj = {
+		global: globalSkillName,
+		trigger: {
+			player: ["showCharacterAfter", "removeCharacterBefore", "die"],
+		},
+		forced: true,
+		silent: true,
+		charlotte: true,
+		filter(event, player) {
+			if (event.name == "showCharacter") {
+				return event.toShow.some(name => get.character(name, 3).includes(skillName));
+			} else if (event.name == "removeCharacter") {
+				return get.character(event.toRemove, 3).includes(skillName);
+			}
+			return true;
+		},
+		async content(event, trigger, player) {
+			let yc = ycName;
+			if (trigger.name == "showCharacter") {
+				if (limitOne) {
+					let bool = await game.addTongling(player.identity, yc, 1);
+					if (!bool) {
+						return;
+					}
+				} else {
+					await game.addTongling(player.identity, yc);
+				}
+				let players = game.players.sortBySeat();
+				for (let p in players) {
+					if (players[p].isFriendOf(player)) {
+						if (players[p].name1.startsWith("gz_shibing")) {
+							var name = players[p].name1;
+							game.log(players[p], "士兵变为了" + get.translation(yc));
+							players[p].reinit(name, yc, false);
+							players[p].showCharacter(0, false);
+							// @ts-expect-error 类型就是这么写的
+							_status.characterlist.add(name);
+							if (!game.useTongling(player.identity, yc)) {
+								break;
+							}
+						}
+						if (players[p].name2.startsWith("gz_shibing")) {
+							var name = players[p].name2;
+							game.log(players[p], "士兵变为了" + get.translation(yc));
+							players[p].reinit(name, yc, false);
+							players[p].showCharacter(1, false);
+							// @ts-expect-error 类型就是这么写的
+							_status.characterlist.add(name);
+							if (!game.useTongling(player.identity, yc)) {
+								break;
+							}
+						}
+					}
+				}
+			} else {
+				await game.removeTongling(player.identity, yc);
+			}
+		},
+		subSkill: {
+			use: {
+				enable: "chooseToUse",
+				sourceSkill: skillName,
+				hiddenCard(player, name) {
+					if (name != cardName) {
+						return false;
+					}
+					return viewAsFilter(player);
+				},
+				get viewAs() {
+					return {
+						name: cardName,
+						isCard: true,
+						...viewAsExtras,
+					};
+				},
+				get mod() {
+					return {
+						...modExtras,
+					};
+				},
+				viewAsFilter(player) {
+					// 限一检查：检查全局所有玩家是否使用过该技能
+					if (limitOne) {
+						for (let p of game.players) {
+							if (p.getAllHistory("useSkill", evt => evt.skill == globalSkillName || evt.sourceSkill == globalSkillName).length > 0) {
+								return false;
+							}
+						}
+					}
+					var sources = game.filterPlayer(function (current) {
+						return current.hasSkill(skillName);
+					});
+					let isFriend = false;
+					for (let s in sources) {
+						if (player.isFriendOf(sources[s])) {
+							isFriend = true;
+						}
+					}
+					return isFriend && !player.hasShibing();
+				},
+				filterCard: () => false,
+				prompt: "视为使用" + cardTranslation,
+				selectCard: [0, 1],
+				check: () => 1,
+				log: false,
+				async precontent(event, trigger, player) {
+					let tl = skillName;
+					if (lib.character[player.name1].skills.includes(tl)) {
+						player.removeCharacter(1);
+					} else if (lib.character[player.name2].skills.includes(tl)) {
+						player.removeCharacter(0);
+					} else {
+						let result = await player
+							.chooseControl(player.name1, player.name2)
+							.set("dialog", ["请移除一个武将", [[player.name1, player.name2], "character"]])
+							.set(
+								"choice",
+								(() => {
+									let rank = get.guozhanRank(player.name1, player) - get.guozhanRank(player.name2, player);
+									if (rank == 0) {
+										rank = Math.random() > 0.5 ? 1 : -1;
+									}
+									return rank > 0 ? player.name2 : player.name1;
+								})()
+							)
+							.forResult();
+						if (result.control) {
+							if (player.name1 == result.control) {
+								player.removeCharacter(0);
+							} else if (player.name2 == result.control) {
+								player.removeCharacter(1);
+							}
+						}
+					}
+				},
+				ai: {
+					order: player => {
+						return get.guozhanRank(ycName, player) - Math.min(get.guozhanRank(player.name1, player), get.guozhanRank(player.name2, player));
+					},
+					result: {
+						player(player) {
+							if (player.getUseValue({ name: cardName }) < 0) {
+								return 0;
+							}
+							return 1;
+						},
+					},
+				},
+			},
+		},
+	};
+
+	// 返回支持链式调用的构建器，同时支持展开运算符
+	const proxy = new Proxy(skillObj, {
+		get(target, prop, receiver) {
+			if (prop === "set") {
+				return (key, value) => {
+					if (key === "viewAs") {
+						Object.assign(viewAsExtras, value);
+					} else if (key === "mod") {
+						Object.assign(modExtras, value);
+					}
+					return receiver;
+				};
+			}
+			return Reflect.get(target, prop, receiver);
+		},
+		ownKeys(target) {
+			return Reflect.ownKeys(target);
+		},
+		getOwnPropertyDescriptor(target, prop) {
+			return Reflect.getOwnPropertyDescriptor(target, prop);
+		},
+	});
+	return proxy;
+}
+
 /** @type { importCharacterConfig['skill'] } */
 const skill = {
 	qj_jianxiong: {
@@ -412,129 +606,6 @@ const skill = {
 				 */
 				async content(_event, trigger, _player) {
 					trigger.num++;
-				},
-			},
-		},
-	},
-	tl_xuchu: {
-		global: "tl_xuchu_use",
-		trigger: {
-			player: ["showCharacterAfter", "removeCharacterBefore", "die"],
-		},
-		forced: true,
-		silent: true,
-		charlotte: true,
-		filter(event, player) {
-			return true;
-		},
-		async content(event, trigger, player) {
-			let yc = "yc_huweijun";
-			if (trigger.name == "showCharacter") {
-				await game.addTongling(player.identity, yc);
-				let players = game.players.sortBySeat();
-				for (let p in players) {
-					if (players[p].isFriendOf(player)) {
-						if (players[p].name1.startsWith("gz_shibing")) {
-							var name = players[p].name1;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(0, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-						if (players[p].name2.startsWith("gz_shibing")) {
-							var name = players[p].name2;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(1, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				await game.removeTongling(player.identity, yc);
-			}
-		},
-		subSkill: {
-			use: {
-				enable: "chooseToUse",
-				sourceSkill: "tl_xuchu",
-				hiddenCard(player, name) {
-					if (name != "juedou") {
-						return false;
-					}
-					return viewAsFilter(player);
-				},
-				viewAs: {
-					name: "juedou",
-					isCard: true,
-				},
-				viewAsFilter(player) {
-					var sources = game.filterPlayer(function (current) {
-						return current.hasSkill("tl_xuchu");
-					});
-					let isFriend = false;
-					for (let s in sources) {
-						if (player.isFriendOf(sources[s])) {
-							isFriend = true;
-						}
-					}
-					return isFriend && !player.hasShibing();
-				},
-				filterCard: () => false,
-				prompt: "视为使用【决斗】",
-				selectCard: [0, 1],
-				check: () => 1,
-				log: false,
-				async precontent(event, trigger, player) {
-					let tl = "tl_xuchu";
-					if (lib.character[player.name1].skills.includes(tl)) {
-						player.removeCharacter(1);
-					} else if (lib.character[player.name2].skills.includes(tl)) {
-						player.removeCharacter(0);
-					} else {
-						let result = await player
-							.chooseControl(player.name1, player.name2)
-							.set("dialog", ["请移除一个武将", [[player.name1, player.name2], "character"]])
-							.set(
-								"choice",
-								(() => {
-									let rank = get.guozhanRank(player.name1, player) - get.guozhanRank(player.name2, player);
-									if (rank == 0) {
-										rank = Math.random() > 0.5 ? 1 : -1;
-									}
-									return rank > 0 ? player.name2 : player.name1;
-								})()
-							)
-							.forResult();
-						if (result.control) {
-							if (player.name1 == result.control) {
-								player.removeCharacter(0);
-							} else if (player.name2 == result.control) {
-								player.removeCharacter(1);
-							}
-						}
-					}
-				},
-				ai: {
-					order: player => {
-						return get.guozhanRank("yc_huweijun", player) - Math.min(get.guozhanRank(player.name1, player), get.guozhanRank(player.name2, player));
-					},
-					result: {
-						player(player) {
-							if (player.getUseValue({ name: "juedou" }) < 0) {
-								return 0;
-							}
-							return 1;
-						},
-					},
 				},
 			},
 		},
@@ -1211,139 +1282,6 @@ const skill = {
 			threaten: 1.3,
 		},
 	},
-	tl_caoren: {
-		global: "tl_caoren_use",
-		trigger: {
-			player: ["showCharacterAfter", "removeCharacterBefore", "die"],
-		},
-		forced: true,
-		silent: true,
-		charlotte: true,
-		filter(event, player) {
-			return true;
-		},
-		async content(event, trigger, player) {
-			let yc = "yc_niujin";
-			if (trigger.name == "showCharacter") {
-				let bool = await game.addTongling(player.identity, yc, 1);
-				if (!bool) {
-					return;
-				}
-				let players = game.players.sortBySeat();
-				for (let p in players) {
-					if (players[p].isFriendOf(player)) {
-						if (players[p].name1.startsWith("gz_shibing")) {
-							var name = players[p].name1;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(0, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-						if (players[p].name2.startsWith("gz_shibing")) {
-							var name = players[p].name2;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(1, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				await game.removeTongling(player.identity, yc);
-			}
-		},
-		subSkill: {
-			use: {
-				enable: "chooseToUse",
-				sourceSkill: "tl_caoren",
-				hiddenCard(player, name) {
-					if (name != "wuxie") {
-						return false;
-					}
-					return viewAsFilter(player);
-				},
-				viewAs: {
-					name: "wuxie",
-					isCard: true,
-					tags: ["guo"],
-				},
-				viewAsFilter(player) {
-					// 检查全局所有玩家是否使用过 tl_caoren_use 技能
-					for (let p of game.players) {
-						if (p.getAllHistory("useSkill", evt => evt.skill == "tl_caoren_use" || evt.sourceSkill == "tl_caoren_use").length > 0) {
-							return false;
-						}
-					}
-					var sources = game.filterPlayer(function (current) {
-						return current.hasSkill("tl_caoren");
-					});
-					let isFriend = false;
-					for (let s in sources) {
-						if (player.isFriendOf(sources[s])) {
-							isFriend = true;
-						}
-					}
-					return isFriend && !player.hasShibing();
-				},
-				filterCard: () => false,
-				prompt: "视为使用国【无懈可击】",
-				selectCard: [0, 1],
-				check: () => 1,
-				log: false,
-				async precontent(event, trigger, player) {
-					let tl = "tl_caoren";
-					if (lib.character[player.name1].skills.includes(tl)) {
-						player.removeCharacter(1);
-					} else if (lib.character[player.name2].skills.includes(tl)) {
-						player.removeCharacter(0);
-					} else {
-						let result = await player
-							.chooseControl(player.name1, player.name2)
-							.set("dialog", ["请移除一个武将", [[player.name1, player.name2], "character"]])
-							.set(
-								"choice",
-								(() => {
-									let rank = get.guozhanRank(player.name1, player) - get.guozhanRank(player.name2, player);
-									if (rank == 0) {
-										rank = Math.random() > 0.5 ? 1 : -1;
-									}
-									return rank > 0 ? player.name2 : player.name1;
-								})()
-							)
-							.forResult();
-						if (result.control) {
-							if (player.name1 == result.control) {
-								player.removeCharacter(0);
-							} else if (player.name2 == result.control) {
-								player.removeCharacter(1);
-							}
-						}
-					}
-				},
-				ai: {
-					order: player => {
-						return get.guozhanRank("yc_niujin", player) - Math.min(get.guozhanRank(player.name1, player), get.guozhanRank(player.name2, player));
-					},
-					result: {
-						player(player) {
-							if (player.getUseValue({ name: "wuxie" }) < 0) {
-								return 0;
-							}
-							return 1;
-						},
-					},
-				},
-			},
-		},
-	},
 	qj_qiangxi: {
 		audio: "qiangxi",
 		mod: {
@@ -1422,129 +1360,6 @@ const skill = {
 				},
 			},
 			threaten: 1.5,
-		},
-	},
-	tl_dianwei: {
-		global: "tl_dianwei_use",
-		trigger: {
-			player: ["showCharacterAfter", "removeCharacterBefore", "die"],
-		},
-		forced: true,
-		silent: true,
-		charlotte: true,
-		filter(event, player) {
-			return true;
-		},
-		async content(event, trigger, player) {
-			let yc = "yc_huweijun";
-			if (trigger.name == "showCharacter") {
-				await game.addTongling(player.identity, yc);
-				let players = game.players.sortBySeat();
-				for (let p in players) {
-					if (players[p].isFriendOf(player)) {
-						if (players[p].name1.startsWith("gz_shibing")) {
-							var name = players[p].name1;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(0, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-						if (players[p].name2.startsWith("gz_shibing")) {
-							var name = players[p].name2;
-							game.log(players[p], "士兵变为了" + get.translation(yc));
-							players[p].reinit(name, yc, false);
-							players[p].showCharacter(1, false);
-							// @ts-expect-error 类型就是这么写的
-							_status.characterlist.add(name);
-							if (!game.useTongling(player.identity, yc)) {
-								break;
-							}
-						}
-					}
-				}
-			} else {
-				await game.removeTongling(player.identity, yc);
-			}
-		},
-		subSkill: {
-			use: {
-				enable: "chooseToUse",
-				sourceSkill: "tl_dianwei",
-				hiddenCard(player, name) {
-					if (name != "juedou") {
-						return false;
-					}
-					return viewAsFilter(player);
-				},
-				viewAs: {
-					name: "juedou",
-					isCard: true,
-				},
-				viewAsFilter(player) {
-					var sources = game.filterPlayer(function (current) {
-						return current.hasSkill("tl_dianwei");
-					});
-					let isFriend = false;
-					for (let s in sources) {
-						if (player.isFriendOf(sources[s])) {
-							isFriend = true;
-						}
-					}
-					return isFriend && !player.hasShibing();
-				},
-				filterCard: () => false,
-				prompt: "视为使用【决斗】",
-				selectCard: [0, 1],
-				check: () => 1,
-				log: false,
-				async precontent(event, trigger, player) {
-					let tl = "tl_xuchu";
-					if (lib.character[player.name1].skills.includes(tl)) {
-						player.removeCharacter(1);
-					} else if (lib.character[player.name2].skills.includes(tl)) {
-						player.removeCharacter(0);
-					} else {
-						let result = await player
-							.chooseControl(player.name1, player.name2)
-							.set("dialog", ["请移除一个武将", [[player.name1, player.name2], "character"]])
-							.set(
-								"choice",
-								(() => {
-									let rank = get.guozhanRank(player.name1, player) - get.guozhanRank(player.name2, player);
-									if (rank == 0) {
-										rank = Math.random() > 0.5 ? 1 : -1;
-									}
-									return rank > 0 ? player.name2 : player.name1;
-								})()
-							)
-							.forResult();
-						if (result.control) {
-							if (player.name1 == result.control) {
-								player.removeCharacter(0);
-							} else if (player.name2 == result.control) {
-								player.removeCharacter(1);
-							}
-						}
-					}
-				},
-				ai: {
-					order: player => {
-						return get.guozhanRank("yc_huweijun", player) - Math.min(get.guozhanRank(player.name1, player), get.guozhanRank(player.name2, player));
-					},
-					result: {
-						player(player) {
-							if (player.getUseValue({ name: "juedou" }) < 0) {
-								return 0;
-							}
-							return 1;
-						},
-					},
-				},
-			},
 		},
 	},
 	qj_quhu: {
@@ -7733,6 +7548,62 @@ const skill = {
 	qj_huangjinleishi: {},
 	qj_fuxinsishi: {},
 	qj_xiyuanjun: {},
+
+	// 统领技能统一管理
+	tl_xuchu: {
+		...createTonglingSkill("tl_xuchu", "yc_huweijun", "juedou", "【决斗】"),
+	},
+	tl_caoren: {
+		...createTonglingSkill("tl_caoren", "yc_niujin", "wuxie", "国【无懈可击】", true).set("viewAs", { tags: ["guo"] }),
+	},
+	tl_dianwei: {
+		...createTonglingSkill("tl_dianwei", "yc_huweijun", "juedou", "【决斗】"),
+	},
+	tl_guanyu: {
+		...createTonglingSkill("tl_guanyu", "yc_zhoucang", "jiu", "【酒】", true),
+	},
+	tl_zhaoyun: {
+		...createTonglingSkill("tl_zhaoyu", "yc_baimayicong", "wuxie", "【无懈可击】"),
+	},
+	tl_zhurongfuren: {
+		...createTonglingSkill("tl_zhurongfuren", "yc_xiangbing", "sha", "【杀】")
+			.set("viewAs", { storage: { tl_zhurongfuren: true } })
+			.set("mod", {
+				targetInRange(card, player, target) {
+					if (card.storage && card.storage.tl_zhurongfuren) {
+						return true;
+					}
+				},
+			}),
+	},
+	tl_ganning: {
+		...createTonglingSkill("tl_ganning", "yc_jinfanjun", "wuxie", "【无懈可击】"),
+	},
+	tl_taishici: {
+		...createTonglingSkill("tl_taishici", "yc_quexiaojiang", "sha", "【杀】", true),
+	},
+	tl_lvbu: {
+		...createTonglingSkill("tl_lvbu", "yc_bingzhoulangqi", "sha", "【杀】"),
+	},
+	tl_zhangjiao: {
+		...createTonglingSkill("tl_zhangjiao", "yc_huangjinleishi", "lulitongxin", "【勠力同心】"),
+	},
+	tl_simashi: {
+		...createTonglingSkill("tl_simazhao", "yc_fuxinsishi", "chuqibuyi", "♥【出其不意】").set("viewAs", { suit: "heart" }),
+	},
+	tl_jin_simayi: {
+		...createTonglingSkill("tl_jin_simayi", "yc_fuxinsishi", "diaohulishan", "【调虎离山】"),
+	},
+	tl_wenyang: {
+		...createTonglingSkill("tl_wenyang", "yc_wenhu", "sha", "冰【杀】", true).set("viewAs", { nature: "ice" }),
+	},
+	tl_fuwan: {
+		...createTonglingSkill("tl_fuwan", "yc_mushun", "shan", "【闪】", true),
+	},
+	tl_jianshuo: {
+		...createTonglingSkill("tl_jianshuo", "yc_xiyuanjun", "shan", "【闪】"),
+	},
 };
 
 export default skill;
+export { createTonglingSkill };
