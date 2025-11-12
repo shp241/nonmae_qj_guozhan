@@ -265,7 +265,7 @@ const translate = {
 	qj_qixi_info: "你可以将一张黑色牌当【过河拆桥】使用。",
 	tl_taishici: "统领【无懈可击】",
 	tl_taishici_info:
-		"【无懈可击】|锦帆军：每回合每颜色限一次，当你弃置牌后，你可以弃置一张同颜色的牌并摸两张牌。",
+		"【无懈可击】|锦帆军：每回合每颜色限一次，你弃置任意角色的牌后，你可以弃置一张其中包含的颜色的牌，然后摸两张牌。",
 	qj_keji: "克己",
 	qj_keji_info:
 		"锁定技，若你未于出牌阶段内使用过颜色不同的牌，你本回合的手牌上限+4。",
@@ -489,7 +489,7 @@ const translate = {
 		"与你势力相同的角色结束阶段，若你或其未受伤，你可以令你或其摸一张牌。",
 	qj_chengliu: "乘流",
 	qj_chengliu_info:
-		"你的伤害牌具有<富甲一改为雷电伤害>，且结算后你可以横置任意名受到此牌伤害的角色。",
+		"你的伤害牌具有<富甲→改为雷电伤害>，且结算后你可以横置任意名受到此牌伤害的角色。",
 	qj_keqing: "克清",
 	qj_keqing_info:
 		"出牌阶段限一次，你可以选择一名已横置的其他角色，直到你再发动此技能或死亡：当其使用或打出牌时，若其横置，其弃置一张牌。",
@@ -592,44 +592,48 @@ const translate = {
 	tl_jianshuo: "统领【闪】",
 	tl_jianshuo_info:
 		"【闪】|西园军：与你势力相同的角色出牌阶段开始时，你可以选择一名角色的一张手牌，本回合此牌对所有角色可见且其不能使用或打出之，其受到伤害后来源获得之。",
-	qj_niujin: "翼从",
+	qj_niujin: "翼从：牛金",
 	qj_niujin_info:
 		"与你势力相同的角色回合结束时，你可以使用每种类别至多各一张牌，你以此法杀死角色后摸三张牌。",
-	qj_zhoucang: "翼从",
+	qj_zhoucang: "翼从：周仓",
 	qj_zhoucang_info:
 		"当你使用【杀】后，你可以将此【杀】或目标角色使用的【闪】交给另一名其他角色，若其以此法获得红色牌，其可以对你攻击范围内的一名角色使用一张【杀】。",
-	qj_quexiaojiang: "翼从",
+	qj_quexiaojiang: "翼从：曲阿小将",
 	qj_quexiaojiang_info:
 		"每回合限一次，当你使用牌后，若此牌目标与你本回合使用的上一张牌不完全相同，你可以对这两张牌的重合目标各造成1点伤害。",
-	qj_wenhu: "翼从",
+	qj_wenhu: "翼从：文虎",
 	qj_wenhu_info:
 		"出牌阶段限一次，你可以弃置任意个区域的所有牌，然后视为使用目标上限为X的【决斗】（X为你以此法弃置牌的区域数）。",
-	qj_mushun: "翼从",
+	qj_mushun: "翼从：穆顺",
 	qj_mushun_info:
 		"每回合限一次，当你弃置任意角色的牌或被其他角色弃置牌后，你可以获得其中一张。若如此做，本回合你下次弃置任意角色的牌或被其他角色弃置牌后，你失去1点体力。",
-	qj_huweijun: "翼从",
+	qj_huweijun: "翼从：虎卫军",
 	qj_huweijun_info:
 		"每回合结束时，若你本回合共计造成和受到过的伤害数大于1，你可以移动场上一张牌。",
-	qj_baimayicong: "翼从",
+	qj_baimayicong: "翼从：白马义从",
 	qj_baimayicong_info: "当你使用或打出【闪】时，你可以获得对方的一张牌。",
-	qj_xiangbing: "翼从",
+	qj_xiangbing: "翼从：象兵",
 	qj_xiangbing_info:
 		"锁定技，当你使用【杀】后，你视为对受到此【杀】伤害的目标角色使用一张【南蛮入侵】；当你受到火焰伤害后，你视为对所有相邻角色使用一张【杀】。",
-	qj_jinfanjun: "翼从",
+	qj_jinfanjun: "翼从：锦帆军",
 	qj_jinfanjun_info:
-		"每回合每颜色限一次，当你弃置牌后，你可以弃置一张同颜色的牌并摸两张牌。",
-	qj_bingzhoulangqi: "翼从",
+		"每回合每颜色限一次，你弃置任意角色的牌后，你可以弃置一张其中包含的颜色的牌，然后摸两张牌。",
+	qj_bingzhoulangqi: "翼从：并州狼骑",
 	qj_bingzhoulangqi_info:
 		"出牌阶段限一次，你可以令一名其他角色视为对你使用一张【决斗】，本回合你与其距离视为1。",
-	qj_huangjinleishi: "翼从",
+	qj_huangjinleishi: "翼从：黄巾雷使",
 	qj_huangjinleishi_info:
 		"每回合首次有角色不因使用手牌而造成伤害时，你可以弃置一张手牌并判定，若为：黑色，此伤害+1；红色，其获得此判定牌。",
-	qj_fuxinsishi: "翼从",
+	qj_fuxinsishi: "翼从：腹心死士",
 	qj_fuxinsishi_info:
 		"与你势力相同的角色回合结束时，若其有未发动的限定技，你可以摸一张牌，交给其一张牌；若其本回合发动过限定技，你可以视为对其攻击范围内的一名角色使用【杀】。",
-	qj_xiyuanjun: "翼从",
+	qj_xiyuanjun: "翼从：西园军",
 	qj_xiyuanjun_info:
 		"与你势力相同的角色出牌阶段开始时，你可以选择一名角色的一张手牌，本回合此牌对所有角色可见且其不能使用或打出之，其受到伤害后来源获得之。",
+	sha_qj_choufa: "筹伐",
+	visible_qj_zhaoran: "可见",
+	heart_qj_minsi:"敏思",
+	visible_qj_xiyuanjun: "可见",
 };
 
 export default translate;
