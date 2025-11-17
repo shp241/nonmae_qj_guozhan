@@ -3440,15 +3440,26 @@ const skill = {
 				}
 				types.add(get.type(history[i].card));
 			}
-			return suits.length >= 4 || types.length >= 3;
+			const suitsConditionMet = suits.length >= 4;
+			const typesConditionMet = types.length >= 3;
+			event._qj_mouduan_conditions = { suitsConditionMet, typesConditionMet };
+			return suitsConditionMet || typesConditionMet;
 		},
 		check(event, player) {
 			return player.canMoveCard(true, void 0);
 		},
 		async content(event, trigger, player) {
+			const { suitsConditionMet, typesConditionMet } = event._qj_mouduan_conditions;
+			const bothConditionsMet = suitsConditionMet && typesConditionMet;
+
 			await player.moveCard();
+
+			if (bothConditionsMet && !player.storage.qj_mouduan_gained_shelie) {
+				player.addSkills("qj_shelie");
+				player.storage.qj_mouduan_gained_shelie = true;
+			}
 		},
-		// TODO: 满足两个条件获得“涉猎”技能；补充 ai
+		// TODO: 补充 ai（让ai更倾向于使用未使用过的花色）
 	},
 	qj_shelie: {
 		audio: 2,
@@ -3633,9 +3644,15 @@ const skill = {
 			},
 		},
 	},
-	// TODO: 主将技
 	qj_fanjian: {
 		audio: 2,
+		mainSkill: true,
+		init(player) {
+			const playerRef = cast(player);
+			if (playerRef.checkMainSkill("qj_fanjian")) {
+				playerRef.removeMaxHp();
+			}
+		},
 		enable: "phaseUse",
 		usable: 1,
 		filter(event, player) {
