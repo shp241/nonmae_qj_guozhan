@@ -4963,7 +4963,55 @@ const skill = {
 		},
 	},
 	qj_xiaomeng: {
-		// TODO: 每回合限一次，当你使用【决斗】时，当前回合角色可以为此牌多指定至多两个目标。
+		trigger: { player: "useCard1" },
+		filter(event, player) {
+			if (event.card.name != "juedou" || !event.card.isCard || player.hasTempSkill("qj_xiaomeng_used")) {
+				return false;
+			}
+			if (event.targets) {
+				if (
+					game.hasPlayer(function (current) {
+						return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current);
+					})
+				) {
+					return true;
+				}
+			}
+			return false;
+		},
+		async cost(event, trigger, player) {
+			const num = game.countPlayer(current => !trigger.targets.includes(current) && lib.filter.targetEnabled2(trigger.card, player, current));
+
+			event.result = await _status.currentPhase
+				.chooseTarget("虓猛：是否为" + get.translation(trigger.card) + "增加" + (num > 1 ? "至多两个" : "一个") + "目标？", [1, Math.min(2, num)], (card, player, target) => {
+					const trigger = get.event().getTrigger();
+					const cardx = trigger.card;
+					return !trigger.targets.includes(target) && lib.filter.targetEnabled2(cardx, player, target);
+				})
+				.set("ai", target => {
+					const player = get.event().player;
+					const card = get.event().getTrigger().card;
+					return get.effect(target, card, player, player);
+				})
+				.setHiddenSkill("gzwushuang")
+				.forResult();
+
+			if (event.result.bool && player != game.me && !player.isOnline()) {
+				await game.delayx();
+			}
+		},
+		logTarget: "targets",
+		async content(event, trigger, player) {
+			const targets = event.targets.sortBySeat();
+			trigger.targets.addArray(targets);
+			player.addTempSkill("qj_xiaomeng_used");
+		},
+		subSkill:{
+			used:{
+				charlotte:true,
+				onremove:true,
+			}
+		}
 	},
 	qj_lijian: {
 		audio: 2,
@@ -5828,36 +5876,140 @@ const skill = {
 			}
 		},
 		ai: {
-			order: 1,
-			result: {
-				target(player) {
-					var num = player.countCards("h");
-					// TODO: 这ai看起来是按身份版的效果写的
-					if (player.hp == 1) {
-						return 1;
+			order: 7,
+		},
+	},
+	qj_shuangren: {
+		audio: "shuangren",
+		trigger: { player: "phaseUseBegin" },
+		preHidden: true,
+		filter(event, player) {
+			return (
+				player.countCards("h") > 0 &&
+				game.hasPlayer(function (current) {
+					return current != player && player.canCompare(current);
+				})
+			);
+		},
+		async cost(event, trigger, player) {
+			var goon;
+			if (player.needsToDiscard() > 1) {
+				goon = player.hasCard(function (card) {
+					return card.number > 10 && get.value(card) <= 5;
+				});
+			} else if (player.hasSha()) {
+				goon = player.hasCard(function (card) {
+					return (card.number >= 9 && get.value(card) <= 5) || get.value(card) <= 3;
+				});
+			} else {
+				goon = player.hasCard(function (card) {
+					return get.value(card) <= 5;
+				});
+			}
+			event.result = await player
+				.chooseTarget(get.prompt2("qj_shuangren"), function (card, player, target) {
+					return player.canCompare(target);
+				})
+				.set("ai", function (target) {
+					var player = _status.event.player;
+					if (_status.event.goon && get.attitude(player, target) < 0) {
+						return get.effect(target, { name: "sha" }, player, player);
 					}
-					if (player.hp == 2 && num <= 2) {
-						return 1;
-					}
-					if (player.hp == 3 && num <= 1) {
-						return 1;
-					}
-					if (game.phaseNumber < game.players.length * 2) {
-						return 0;
-					}
-					if (player.hasUnknown()) {
-						return 0;
-					}
-					return 1;
+					return 0;
+				})
+				.set("goon", goon)
+				.setHiddenSkill(event.name).forResult();
+		},
+		async content(event, trigger, player) {
+			var target = event.targets[0];
+			player.logSkill("qj_shuangren", target);
+			let result=await player.chooseToCompare(target).forResult();
+			if (result.bool) {
+				if (game.hasPlayer(current => target != current && player.canUse("sha", current, false))) {
+					var str = "请选择视为使用【杀】的目标";
+					var str2 = "操作提示：选择一名角色，或选择包含" + get.translation(target) + "在内的两名角色";
+					let result2=await player
+						.chooseTarget([1, 2], str, str2, true, function (card, player, target) {
+							if (!player.canUse("sha", target, false)) {
+								return false;
+							}
+							var current = _status.event.target;
+							if (target == current) {
+								return true;
+							}
+							if (!ui.selected.targets.length) {
+								return true;
+							}
+							return ui.selected.targets[0] == current;
+						})
+						.set("ai", function (target) {
+							var player = _status.event.player;
+							return get.effect(target, { name: "sha" }, player, player);
+						})
+						.set("target", target)
+						.set("complexTarget", true);
+				} else {
+					await player.useCard({ name: "sha", isCard: true }, target, false);
+					return;
+				}
+				if (result2.bool && result2.targets && result2.targets.length) {
+					await player.useCard({ name: "sha", isCard: true }, result2.targets, false);
+				}
+			} else {
+				player.addTempSkill("qj_shuangren_debuff", "phaseUseAfter");
+				return;
+			}
+		},
+		subSkill: {
+			debuff: {
+				charlotte: true,
+				mod: {
+					cardname(card) {
+						if (card.name == "sha") {
+							return "jiedao";
+						}
+					},
 				},
 			},
 		},
 	},
-	qj_shuangren: {
-		// TODO: "出牌阶段开始时，你可以与一名其他角色拼点，若你赢，你视为对包含其在内的至多两名角色使用【杀】；若你没赢，本回合你手牌中的【杀】只能当【借刀杀人】使用。"
-	},
 	qj_sijian: {
-		// TODO: "当你失去最后的手牌后，或当你的体力值变化为1后，你可以弃置一名其他角色的一张牌。"
+		trigger: {
+			player: ["loseAfter","changeHp"],
+			global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+		},
+		audio: "sijian",
+		preHidden: true,
+		filter(event, player) {
+			if(event.name == "changeHp") {
+				return player.getHp() == 1;
+			}
+			if (player.countCards("h")) {
+				return false;
+			}
+			if (event.name == "gain" && event.player == player) {
+				return false;
+			}
+			var evt = event.getl(player);
+			return evt && evt.hs && evt.hs.length > 0;
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+			.chooseTarget(get.prompt("sijian"), "弃置一名其他角色的一张牌", function (card, player, target) {
+				return player != target && target.countCards("he") > 0;
+			})
+			.set("ai", function (target) {
+				return -get.attitude(_status.event.player, target);
+			})
+			.setHiddenSkill(event.name).forResult();
+		},
+		async content(event, trigger, player) {
+			player.logSkill("qj_sijian", event.targets);
+			await player.discardPlayerCard(event.targets[0], true);
+		},
+		ai: {
+			expose: 0.2,
+		},
 	},
 	qj_suishi: {
 		audio: "suishi",
@@ -5892,8 +6044,22 @@ const skill = {
 					return event.player.isFriendOf(player);
 				},
 				async content(_event, _trigger, player) {
-					// TODO: "或弃置所有手牌。"
-					await player.loseHp();
+					if(player.countCards("h") == 0) {
+						await player.loseHp();
+					}else{
+						let result = await player.chooseControl("失去一点体力", "弃置所有手牌")
+							.set("choice",(function(){
+								if(player.countCards("h") <= 2 || player.hp < 2) {
+									return "弃置所有手牌";
+								}
+								return "失去一点体力";
+							})());
+						if(result == "失去一点体力") {
+							await player.loseHp();
+						}else{
+							await player.discard(player.getCards("h"));
+						}
+					}
 				},
 			},
 		},
@@ -6028,7 +6194,116 @@ const skill = {
 		},
 	},
 	qj_huoshui: {
-		// TODO: "你的回合内，其他角色不能明置其武将牌；出牌阶段，你可以弃置一张黑色牌并暗置一名武将牌均明置的其他角色一张武将牌，然后其交给你一张牌。"
+		global: "qj_huoshui_mingzhi",
+		enable: "phaseUse",
+		filter(event, player) {
+			return (
+				player.countCards("he", { color: "black" }) > 0 &&
+				game.hasPlayer(function (current) {
+					return current != player && !current.isUnseen(2);
+				})
+			);
+		},
+		filterCard: {
+			color: "black",
+		},
+		position: "he",
+		filterTarget(card, player, target) {
+			if (target == player) {
+				return false;
+			}
+			return !target.isUnseen(2);
+		},
+		check(card) {
+			return 6 - get.value(card, get.event().player);
+		},
+		async content(event, trigger, player) {
+			let target=event.target;
+			let result;
+			if (get.is.jun(cast(target))) {
+				result = { control: "副将" };
+			} else {
+				let choice = "主将";
+				const skills = lib.character[target.name2][3];
+				for (var i = 0; i < skills.length; i++) {
+					var info = get.info(skills[i]);
+					if (info && info.ai && info.ai.maixie) {
+						choice = "副将";
+						break;
+					}
+				}
+				if (get.character(target.name, 3).includes("buqu")) {
+					choice = "主将";
+				} else if (get.character(target.name2, 3).includes("buqu")) {
+					choice = "副将";
+				}
+				result = await player
+					.chooseControl("主将", "副将", () => {
+						// @ts-expect-error 类型系统未来可期
+						return _status.event.choice;
+					})
+					.set("prompt", "暗置" + get.translation(event.target) + "的一张武将牌")
+					.set("choice", choice)
+					.forResult();
+			}
+
+			if (result.control == "主将") {
+				target.hideCharacter(0);
+			} else {
+				target.hideCharacter(1);
+			}
+			target.addTempSkill("qingcheng_ai");
+			if(target.countCards("he") > 0) {
+				let result1=await target.chooseCard("he", true).forResult();
+				if(result1.bool) {
+					await target.give(result1.cards, player);
+				}
+			}
+		},
+		ai: {
+			order: 8,
+			result: {
+				target(player, target) {
+					if (target.hp <= 0) {
+						return -5;
+					}
+					if (player.getStat().skill.gz_qingcheng) {
+						return 0;
+					}
+					if (!target.hasSkillTag("maixie")) {
+						return 0;
+					}
+					if (get.attitude(player, target) >= 0) {
+						return 0;
+					}
+					if (
+						player.hasCard(function (card) {
+							return get.tag(card, "damage") && player.canUse(card, target, cast(true), true);
+						}, undefined)
+					) {
+						if (target.maxHp > 3) {
+							return -0.5;
+						}
+						return -1;
+					}
+					return 0;
+				},
+			},
+		},
+		subSkill: {
+			mingzhi: {
+				ai: {
+					nomingzhi: true,
+					skillTagFilter(player) {
+						// @ts-expect-error 类型系统未来可期
+						if (_status.currentPhase && _status.currentPhase != player && _status.currentPhase.hasSkill("qj_huoshui")) {
+							return true;
+						}
+						return false;
+					},
+				},
+			},
+		},
 	},
 	qj_qingcheng: {
 		audio: 2,
@@ -6056,7 +6331,31 @@ const skill = {
 		},
 	},
 	qj_xiaoni: {
-		// TODO: "限定技，出牌阶段，你可以视为对任意名其他势力的角色使用一张【杀】，然后弃置其中一名未以此法受到伤害的角色三张牌。"
+		limited:true,
+		enable: "phaseUse",
+		filterTarget(card, player, target) {
+			return target != player && !target.isFriendOf(player);
+		},
+		selectTarget: [1, Infinity],
+		multitarget: true,
+		async content(event, trigger, player) {
+			var card = { name: "sha", isCard: true };
+			await player.useCard(card, event.targets).forResult();
+			let targets = [];
+			for(let target of event.targets) {
+				if(target.getHistory("damage", function (evt) {
+					return evt.card == card;
+				}).length == 0 && target.countDiscardableCards(player, "he") > 0) {
+					targets.push(target);
+				}
+			}
+			if(targets.length) {
+				let result = await player.chooseTarget(targets,true).forResult();
+				if(result.bool) {
+					await player.discardPlayerCard(result.target, true, "he", 3);
+				}
+			}
+		},
 	},
 	qj_chuitong: {
 		trigger: {
