@@ -3889,7 +3889,53 @@ const skill = {
 		},
 	},
 	qj_duoshi: {
-		// TODO: "你可以将本回合未置入过弃牌堆的花色的一张牌当【以逸待劳】使用，然后若均已置入过，你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
+		audio: 2,
+		enable: "chooseToUse",
+		position: "he",
+		viewAs: { name: "yiyi" },
+		// 中央区没有的花色
+		_cachedAvailableSuits: null,
+		// 计算并更新 _cachedAvailableSuits
+		updateAvailableSuits() {
+			const discardedCards = get.discarded();
+			const discardedSuits = [];
+			for (const discardedCard of discardedCards) {
+				const suit = get.suit(discardedCard);
+				if (suit && !discardedSuits.includes(suit)) {
+					discardedSuits.push(suit);
+				}
+			}
+			const allSuits = ["spade", "heart", "diamond", "club"];
+			this._cachedAvailableSuits = allSuits.filter(suit => !discardedSuits.includes(suit));
+		},
+		// 你可以将本回合未置入过弃牌堆的花色的一张牌当【以逸待劳】使用
+		viewAsFilter(player) {
+			this.updateAvailableSuits();
+			if (this._cachedAvailableSuits.length === 0) {
+				return false;
+			}
+			return player.hasCard(card => {
+				const suit = get.suit(card, player);
+				return this._cachedAvailableSuits.includes(suit);
+			}, "he");
+		},
+		filterCard(card, player) {
+			const cardSuit = get.suit(card, player);
+			return lib.skill.qj_duoshi._cachedAvailableSuits?.includes(cardSuit) ?? false;
+		},
+		prompt(event) {
+			const availableSuits = lib.skill.qj_duoshi._cachedAvailableSuits;
+
+			if (!availableSuits || availableSuits.length === 0) {
+				return "将一张本回合未置入过弃牌堆的花色的牌当【以逸待劳】使用";
+			}
+			const availableSuitsText = availableSuits.map(suit => get.translation(suit)).join("/");
+			return `将一张${availableSuitsText}的牌当【以逸待劳】使用`;
+		},
+		check(card) {
+			return 4 - get.value(card);
+		},
+		// TODO: 然后若均已置入过，你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
 	},
 	qj_jieyin: {
 		audio: 2,
