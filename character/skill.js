@@ -3810,7 +3810,83 @@ const skill = {
 		},
 	},
 	qj_qianxun: {
-		// TODO: "锁定技，你每回合首次成为锦囊牌的目标时，若此牌有其他未指定的合法目标，取消之。"
+		// TODO: 待测试
+		audio: "qianxun",
+		trigger: {
+			target: "useCardToTarget",
+			player: "addJudgeBefore",
+		},
+		forced: true,
+		preHidden: true,
+		priority: 15,
+		check(event, player) {
+			return event.name == "addJudge" || get.effect(event.target, event.card, event.player, player) < 0;
+		},
+		filter(event, player) {
+			// 条件1: 这张牌是锦囊牌
+			if (get.type(event.card) != "trick") {
+				return false;
+			}
+
+			// 条件2: 这是当前回合下第一次成为锦囊牌的目标
+			// TODO: 实际上判断的是本回合是否已经触发过谦逊，而非是否是第一次成为锦囊牌的目标
+			if (player.hasMark("qj_qianxun_triggered")) {
+				return false; // 本回合已经触发过
+			}
+
+			// 条件3: 这张牌选择的目标中，有其他能成为目标但未被选择为目标的角色
+			const useCardEvent = event.getParent("useCard");
+			if (!useCardEvent || !useCardEvent.targets) {
+				return false;
+			}
+			const card = event.card;
+
+			// 检查是否有其他合法目标未被选择
+			const allPlayers = game.players.slice();
+			if (useCardEvent.deadTarget || (card && get.info(card)?.deadTarget)) {
+				allPlayers.addArray(game.dead);
+			}
+
+			for (const target of allPlayers) {
+				// 如果这个目标已经在选择列表中，跳过
+				if (useCardEvent.targets.includes(target)) {
+					continue;
+				}
+				// 检查这个目标是否可以成为合法目标
+				if (lib.filter.targetEnabled2(card, event.player, target)) {
+					return true; // 找到了其他合法目标
+				}
+			}
+
+			return false; // 没有其他合法目标
+		},
+		async content(event, trigger, player) {
+			if (trigger.name == "addJudge") {
+				trigger.cancel(undefined, undefined, undefined);
+				const owner = get.owner(trigger.card);
+				if (owner && owner.getCards("hej").includes(trigger.card)) {
+					owner.lose(trigger.card, ui.discardPile);
+				} else {
+					game.cardsDiscard(trigger.card);
+				}
+				game.log(trigger.card, "进入了弃牌堆");
+			} else {
+				// 标记本回合已触发
+				player.markAuto("qj_qianxun_triggered", "triggered");
+				player.addTempSkill("qj_qianxun_triggered");
+				trigger.getParent()?.targets?.remove(player);
+			}
+		},
+		subSkill: {
+			triggered: {
+				charlotte: true,
+				onremove: true,
+				content() {
+					// 当临时技能被移除时，清除标记
+					player.unmarkAuto("qj_qianxun_triggered");
+				},
+			},
+		},
 	},
 	qj_duoshi: {
 		// TODO: "你可以将本回合未置入过弃牌堆的花色的一张牌当【以逸待劳】使用，然后若均已置入过，你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
