@@ -3892,6 +3892,7 @@ const skill = {
 		audio: 2,
 		enable: "chooseToUse",
 		position: "he",
+		group: ["qj_duoshi_checkAfter"],
 		viewAs: { name: "yiyi" },
 		// 中央区没有的花色
 		_cachedAvailableSuits: null,
@@ -3935,7 +3936,28 @@ const skill = {
 		check(card) {
 			return 4 - get.value(card);
 		},
-		// TODO: 然后若均已置入过，你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
+		subSkill: {
+			checkAfter: {
+				trigger: { player: "useCardAfter" },
+				forced: true,
+				popup: false,
+				charlotte: true,
+				filter(event, player) {
+					return event.card && event.skill == "qj_duoshi";
+				},
+				content() {
+					// TODO: delete
+					player.draw();
+					lib.skill.qj_duoshi.updateAvailableSuits();
+
+					// TODO: 如果中央区有四种花色
+					if (!lib.skill.qj_duoshi._cachedAvailableSuits.length) {
+						// TODO:你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
+						player.draw(3);
+					}
+				},
+			},
+		},
 	},
 	qj_jieyin: {
 		audio: 2,
