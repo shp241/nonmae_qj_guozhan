@@ -677,11 +677,11 @@ const skill = {
 					cards.length == 1
 						? { result: { links: cards.slice(0), bool: true } }
 						: await player.chooseCardButton("遗计：请选择要分配的牌", true, cards, [1, cards.length]).set("ai", () => {
-							if (ui.selected.buttons.length == 0) {
-								return 1;
-							}
-							return 0;
-						});
+								if (ui.selected.buttons.length == 0) {
+									return 1;
+								}
+								return 0;
+						  });
 				if (!bool) {
 					return;
 				}
@@ -2533,7 +2533,7 @@ const skill = {
 			player.markAuto("qj_kuanggu_effect", control);
 			event.result = { bool: true, skill_popup: false };
 		},
-		async content(_event, _trigger, _player) { },
+		async content(_event, _trigger, _player) {},
 		subSkill: {
 			effect: {
 				mod: {
@@ -3854,6 +3854,8 @@ const skill = {
 				}
 				// 检查这个目标是否可以成为合法目标
 				if (lib.filter.targetEnabled2(card, event.player, target)) {
+					player.markAuto("qj_qianxun_triggered", "triggered");
+					player.addTempSkill("qj_qianxun_triggered");
 					return true; // 找到了其他合法目标
 				}
 			}
@@ -3872,8 +3874,6 @@ const skill = {
 				game.log(trigger.card, "进入了弃牌堆");
 			} else {
 				// 标记本回合已触发
-				player.markAuto("qj_qianxun_triggered", "triggered");
-				player.addTempSkill("qj_qianxun_triggered");
 				trigger.getParent()?.targets?.remove(player);
 			}
 		},
@@ -3881,10 +3881,6 @@ const skill = {
 			triggered: {
 				charlotte: true,
 				onremove: true,
-				content() {
-					// 当临时技能被移除时，清除标记
-					player.unmarkAuto("qj_qianxun_triggered");
-				},
 			},
 		},
 	},
@@ -3894,38 +3890,45 @@ const skill = {
 		position: "he",
 		group: ["qj_duoshi_checkAfter"],
 		viewAs: { name: "yiyi" },
-		// 中央区没有的花色
-		_cachedAvailableSuits: null,
-		// 计算并更新 _cachedAvailableSuits
-		updateAvailableSuits() {
+		// 计算并更新已进入弃牌堆的花色至玩家storage
+		getDiscardedSuits(player) {
+			if (!player) return [];
+			const allowedSuits = ["spade", "heart", "diamond", "club"];
 			const discardedCards = get.discarded();
 			const discardedSuits = [];
 			for (const discardedCard of discardedCards) {
 				const suit = get.suit(discardedCard);
-				if (suit && !discardedSuits.includes(suit)) {
+				if (allowedSuits.includes(suit) && !discardedSuits.includes(suit)) {
 					discardedSuits.push(suit);
 				}
 			}
+			player.storage.qj_duoshi_discardedSuits = discardedSuits.slice(0);
+			return discardedSuits;
+		},
+		getAvailableSuits(player) {
+			if (!player) return [];
+			const discardedSuits = lib.skill.qj_duoshi.getDiscardedSuits(player);
 			const allSuits = ["spade", "heart", "diamond", "club"];
-			this._cachedAvailableSuits = allSuits.filter(suit => !discardedSuits.includes(suit));
+			return allSuits.filter(suit => !discardedSuits.includes(suit));
 		},
 		// 你可以将本回合未置入过弃牌堆的花色的一张牌当【以逸待劳】使用
 		viewAsFilter(player) {
-			this.updateAvailableSuits();
-			if (this._cachedAvailableSuits.length === 0) {
+			const availableSuits = lib.skill.qj_duoshi.getAvailableSuits(player);
+			if (availableSuits.length === 0) {
 				return false;
 			}
 			return player.hasCard(card => {
 				const suit = get.suit(card, player);
-				return this._cachedAvailableSuits.includes(suit);
+				return availableSuits.includes(suit);
 			}, "he");
 		},
 		filterCard(card, player) {
 			const cardSuit = get.suit(card, player);
-			return lib.skill.qj_duoshi._cachedAvailableSuits?.includes(cardSuit) ?? false;
+			const availableSuits = lib.skill.qj_duoshi.getAvailableSuits(player);
+			return availableSuits.includes(cardSuit);
 		},
 		prompt(event) {
-			const availableSuits = lib.skill.qj_duoshi._cachedAvailableSuits;
+			const availableSuits = lib.skill.qj_duoshi.getAvailableSuits(event?.player);
 
 			if (!availableSuits || availableSuits.length === 0) {
 				return "将一张本回合未置入过弃牌堆的花色的牌当【以逸待劳】使用";
@@ -3945,18 +3948,68 @@ const skill = {
 				filter(event, player) {
 					return event.card && event.skill == "qj_duoshi";
 				},
-				content() {
-					// TODO: delete
-					player.draw();
-					lib.skill.qj_duoshi.updateAvailableSuits();
-
-					// TODO: 如果中央区有四种花色
-					if (!lib.skill.qj_duoshi._cachedAvailableSuits.length) {
-						// TODO:你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。
-						player.draw(3);
+				async content(event, trigger, player) {
+					if(lib.skill.qj_duoshi.getDiscardedSuits(player).length === 4) {
+						const result = await player.chooseTarget("你可以令一名小势力角色选择是否将X张红色牌当【火烧连营】使用（X为目标数）。", function (card, player, target) {
+							return target.isMinor() && target.countCards("h", card => {
+								if (!target.hasUseTarget(get.autoViewAs({ name: "huoshaolianying" }, [card]))) {
+									return false;
+								}
+								return target != player || game.checkMod(card, player, "unchanged", "cardEnabled2", player);
+							}) >= 1;
+						})
+						.set("ai", target => {
+							return target.getUseValue({ name: "huoshaolianying" });
+						})
+						.forResult();
+						if(result.bool) {
+							player.line(result.targets[0]);
+							await result.targets[0]
+								.chooseToUse()
+								.set("openskilldialog", "度势：是否将X张红色牌当【火烧连营】使用（X为目标数）。")
+								.set("norestore", true)
+								.set("_backupevent", "qj_duoshi_backup")
+								.set("custom", {
+									add: {},
+									replace: { window() {} },
+								})
+								.set("addCount", false)
+								.set("oncard", () => _status.event.directHit.addArray(game.players))
+								.backup("qj_duoshi_backup");
+						}
 					}
 				},
 			},
+		},
+		init(player) {
+			player.storage.qj_duoshi_discardedSuits = [];
+		},
+		onremove(player) {
+			delete player.storage.qj_duoshi_discardedSuits;
+		},
+		backup: {
+			selectCard: [1, Infinity],
+			filterOk() {
+				let target = ui.selected.targets;
+				let targets = game.countPlayer(function (current) {
+					for(let i of target) {
+						if(i.inline(current)) {
+							return true;
+						}
+					}
+					return false;
+				});
+				return ui.selected.cards.length == targets.length;
+			},
+			filterCard(card) {
+				return get.itemtype(card) == "card" && get.color(card) == "red";
+			},
+			position: "hs",
+			check(card) {
+				return 7 - get.value(card);
+			},
+			log: false,
+			viewAs: { name: "huoshaolianying" },
 		},
 	},
 	qj_jieyin: {
@@ -4195,12 +4248,12 @@ const skill = {
 						get.tag(card, "damage") &&
 						get.itemtype(player) === "player" &&
 						target.hp >
-						(player.hasSkillTag("damageBonus", true, {
-							target: target,
-							card: card,
-						})
-							? 2
-							: 1)
+							(player.hasSkillTag("damageBonus", true, {
+								target: target,
+								card: card,
+							})
+								? 2
+								: 1)
 					) {
 						return [1, 0.5];
 					}
@@ -5171,8 +5224,8 @@ const skill = {
 			used: {
 				charlotte: true,
 				onremove: true,
-			}
-		}
+			},
+		},
 	},
 	qj_lijian: {
 		audio: 2,
@@ -5470,7 +5523,7 @@ const skill = {
 		filter(event, player, name) {
 			return _status.currentPhase == player && event.player != player;
 		},
-		async content() { },
+		async content() {},
 	},
 	qj_luanwu: {
 		audio: 2,
@@ -6079,7 +6132,8 @@ const skill = {
 					return 0;
 				})
 				.set("goon", goon)
-				.setHiddenSkill(event.name).forResult();
+				.setHiddenSkill(event.name)
+				.forResult();
 		},
 		async content(event, trigger, player) {
 			var target = event.targets[0];
@@ -6162,7 +6216,8 @@ const skill = {
 				.set("ai", function (target) {
 					return -get.attitude(_status.event.player, target);
 				})
-				.setHiddenSkill(event.name).forResult();
+				.setHiddenSkill(event.name)
+				.forResult();
 		},
 		async content(event, trigger, player) {
 			player.logSkill("qj_sijian", event.targets);
@@ -6208,13 +6263,15 @@ const skill = {
 					if (player.countCards("h") == 0) {
 						await player.loseHp();
 					} else {
-						let result = await player.chooseControl("失去一点体力", "弃置所有手牌")
-							.set("choice", (function () {
+						let result = await player.chooseControl("失去一点体力", "弃置所有手牌").set(
+							"choice",
+							(function () {
 								if (player.countCards("h") <= 2 || player.hp < 2) {
 									return "弃置所有手牌";
 								}
 								return "失去一点体力";
-							})());
+							})()
+						);
 						if (result == "失去一点体力") {
 							await player.loseHp();
 						} else {
@@ -6504,9 +6561,12 @@ const skill = {
 			await player.useCard(card, event.targets).forResult();
 			let targets = [];
 			for (let target of event.targets) {
-				if (target.getHistory("damage", function (evt) {
-					return evt.card == card;
-				}).length == 0 && target.countDiscardableCards(player, "he") > 0) {
+				if (
+					target.getHistory("damage", function (evt) {
+						return evt.card == card;
+					}).length == 0 &&
+					target.countDiscardableCards(player, "he") > 0
+				) {
 					targets.push(target);
 				}
 			}
@@ -7267,9 +7327,9 @@ const skill = {
 		},
 		async content(event, trigger, player) {
 			const {
-				targets: [target],
-				cost_data: links,
-			} = event,
+					targets: [target],
+					cost_data: links,
+				} = event,
 				cards = trigger.cards2.filterInD("d");
 			await target.gain(links, "gain2");
 			cards.remove(links[0]);
@@ -9146,12 +9206,12 @@ const skill = {
 				.chooseToDiscard("he", "你可以弃置至少一张牌，然后" + get.translation(trigger.player) + "可以弃置至少一张牌，若你与其共计弃置的牌数达到三张，你与其各回复1点体力", [1, Infinity])
 				.set("ai", function (card) {
 					if (!trigger.player.isFriendOf(player)) {
-						return ui.selected.targets.length > 0 ? 0 : 7 - get.value(card);
+						return ui.selected.targets.length > 0 ? -1 : 7 - get.value(card);
 					}
 					const h1 = player.countCards("he");
 					const h2 = trigger.player.countCards("he");
-					const maxTargets = h1 < h2 ? 0 : (h2 === 0 || h1 - h2 > 2 ? 2 : 1);
-					return ui.selected.targets.length > maxTargets ? 0 : 7 - get.value(card);
+					const maxTargets = h1 < h2 ? -1 : h2 === 0 || h1 - h2 > 2 ? 2 : 1;
+					return ui.selected.targets.length > maxTargets ? -1 : 7 - get.value(card);
 				})
 				.set(
 					"goon",
@@ -9167,9 +9227,9 @@ const skill = {
 				.chooseToDiscard("he", get.translation(player) + "弃置了" + event.cards.length + "张牌，你可以弃置至少一张牌，若你与其共计弃置的牌数达到三张，你与其各回复1点体力", [1, Infinity])
 				.set("ai", function (card) {
 					if (event.cards.length == 1) {
-						return ui.selected.targets.length > 1 ? 0 : 7 - get.value(card);
+						return ui.selected.targets.length > 1 ? -1 : 7 - get.value(card);
 					}
-					return ui.selected.targets.length > 0 ? 0 : 7 - get.value(card);
+					return ui.selected.targets.length > 0 ? -1 : 7 - get.value(card);
 				})
 				.set(
 					"goon",
@@ -9195,8 +9255,8 @@ const skill = {
 			used: {
 				charlotte: true,
 				onremove: true,
-			}
-		}
+			},
+		},
 	},
 	qj_juebie: {
 		trigger: {
@@ -9376,11 +9436,11 @@ const skill = {
 								cards.length == 1
 									? { result: { links: cards.slice(0), bool: true } }
 									: await player.chooseCardButton("博通：请选择要分配的牌", true, cards, [1, cards.length]).set("ai", () => {
-										if (ui.selected.buttons.length == 0) {
-											return 1;
-										}
-										return 0;
-									});
+											if (ui.selected.buttons.length == 0) {
+												return 1;
+											}
+											return 0;
+									  });
 							if (!bool) {
 								return;
 							}
@@ -9515,9 +9575,11 @@ const skill = {
 			if (player.countCards("h") == 0) {
 				return false;
 			}
-			return game.hasPlayer(function (current) {
-				return player.canCompare(current);
-			}) && !player.hasSkill("qj_fenyue_used");
+			return (
+				game.hasPlayer(function (current) {
+					return player.canCompare(current);
+				}) && !player.hasSkill("qj_fenyue_used")
+			);
 		},
 		filterTarget(card, player, target) {
 			return player.canCompare(target);
@@ -9555,7 +9617,7 @@ const skill = {
 			used: {
 				charlotte: true,
 				onremove: true,
-			}
+			},
 		},
 	},
 	qj_jingnu: {
@@ -9575,9 +9637,11 @@ const skill = {
 			return false;
 		},
 		async cost(event, trigger, player) {
-			event.result = await player.chooseTarget("视为对一名角色使用一张【杀】", function (card, player, target) {
-				return player.canUse({ name: "sha", isCard: true }, target);
-			}).forResult();
+			event.result = await player
+				.chooseTarget("视为对一名角色使用一张【杀】", function (card, player, target) {
+					return player.canUse({ name: "sha", isCard: true }, target);
+				})
+				.forResult();
 		},
 		async content(event, trigger, player) {
 			if (player.canUse({ name: "sha", isCard: true }, event.target)) {
@@ -9593,7 +9657,8 @@ const skill = {
 			return !game.hasPlayer(current => current.countCards("h") > player.countCards("h") && current.isIn());
 		},
 		async cost(event, trigger, player) {
-			event.result = await player.chooseTarget("视为对任意名角色使用【桃园结义】和【五谷丰登】")
+			event.result = await player
+				.chooseTarget("视为对任意名角色使用【桃园结义】和【五谷丰登】")
 				.set("ai", target => {
 					return get.attitude(player, target);
 				})
@@ -9610,14 +9675,16 @@ const skill = {
 			if (player.countCards("h") == 0) {
 				return false;
 			}
-			return game.hasPlayer(function (current) {
-				for (let i of player.getStat()._qj_kannan) {
-					if (current.isFriendOf(i)) {
-						return false;
+			return (
+				game.hasPlayer(function (current) {
+					for (let i of player.getStat()._qj_kannan) {
+						if (current.isFriendOf(i)) {
+							return false;
+						}
 					}
-				}
-				return player.canCompare(current);
-			}) && !player.hasSkill("qj_kannan_used");
+					return player.canCompare(current);
+				}) && !player.hasSkill("qj_kannan_used")
+			);
 		},
 		filterTarget(card, player, target) {
 			for (let i of player.getStat()._qj_kannan) {
@@ -9683,7 +9750,7 @@ const skill = {
 			used: {
 				charlotte: true,
 				onremove: true,
-			}
+			},
 		},
 	},
 	qj_niju: {
