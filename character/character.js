@@ -175,7 +175,7 @@ const character = {
 		sex: "male",
 		group: "shu",
 		hp: 4,
-		skills: ["qj_liegong"],
+		skills: ["qj_lieyong"],
 		keGroup: ["qun"],
 		dieAudios: ["huangzhong"],
 	},
@@ -355,7 +355,7 @@ const character = {
 		group: "qun",
 		hp: 3,
 		skills: ["qj_jishi", "qj_chuli"],
-		keGroup: ["han", "wei", "shu", "wu"],
+		// keGroup: ["han", "wei", "shu", "wu"],
 		dieAudios: ["huatuo"],
 	},
 	qj_lvbu: {
@@ -686,8 +686,8 @@ const character = {
 		sex: "male",
 		group: "han",
 		hp: 4,
-		skills: ["qj_jibing"],
-		dieAudios: ["tw_jianshuo", "tl_jianshuo"],
+		skills: ["qj_jibing", "tl_jianshuo"],
+		dieAudios: ["tw_jianshuo"],
 	},
 	//士兵
 	yc_niujin: {
