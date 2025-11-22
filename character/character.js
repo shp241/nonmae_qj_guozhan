@@ -144,7 +144,7 @@ const character = {
 	qj_zhugeliang: {
 		sex: "male",
 		group: "shu",
-		hp: 3,
+		hp: 4,
 		skills: ["qj_guanxing", "qj_kongcheng"],
 		dieAudios: ["zhugeliang"],
 	},
