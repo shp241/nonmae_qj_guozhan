@@ -7409,7 +7409,21 @@ const skill = {
 			if (player.hasSkill("qj_jiexia_used")) {
 				return false;
 			}
-			return event.player != player && (event.player.isUnseen() || (event.player.isUnseen(2) && !player.isUnseen(2))) && event.player.isIn() && player.countCards("he") > 1;
+			let num1 = 0,
+				num2 = 0;
+			if (!player.isUnseen(0) && !player.name1.startsWith("gz_shibing") && !lib.character[player.name1].isShibing) {
+				num1++;
+			}
+			if (!player.isUnseen(1) && !player.name2.startsWith("gz_shibing") && !lib.character[player.name2].isShibing) {
+				num1++;
+			}
+			if (!event.player.isUnseen(0) && !event.player.name1.startsWith("gz_shibing") && !lib.character[event.player.name1].isShibing) {
+				num2++;
+			}
+			if (!event.player.isUnseen(1) && !event.player.name2.startsWith("gz_shibing") && !lib.character[event.player.name2].isShibing) {
+				num2++;
+			}
+			return event.player != player && num1 > num2 && event.player.isIn() && player.countCards("he") > 1;
 		},
 		async cost(event, trigger, player) {
 			event.result = await player

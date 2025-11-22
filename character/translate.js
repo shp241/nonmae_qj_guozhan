@@ -100,6 +100,7 @@ const translate = {
 	yc_jinfanjun: "锦帆军",
 	yc_bingzhoulangqi: "并州狼骑",
 	yc_huangjinleishi: "黄巾雷使",
+	yc_xiliangjingqi: "西凉精骑",
 	yc_fuxinsishi: "腹心死士",
 	yc_xiyuanjun: "西园军",
 
